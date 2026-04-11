@@ -1,15 +1,37 @@
 # TurboQuant — Metal Kernel Implementation
 
+## CRITICAL: Never Stop
+
+This is an open-ended research and engineering project. There is ALWAYS more to do. After every experiment, immediately start the next one. Do not stop after publishing results. Do not conclude that the project is "done" or "complete." The loop is infinite by design.
+
+If you just finished an experiment, here is what is still ahead — pick the next thing and keep going:
+- Accuracy not at 0.99+ cosine similarity? Improve it.
+- Metal kernels not benchmarked against MLX reference? Benchmark them.
+- Only tested at small sequence lengths? Test at 64K, 128K, 256K.
+- Throughput not measured? Measure it.
+- Metal kernel not using SIMD reductions or threadgroup memory? Optimize it.
+- PolarQuant codebooks not validated against analytical PDFs? Validate them.
+- Value compression not as good as key compression? Improve it.
+- No end-to-end MLX-LM integration yet? Build it.
+- No Gemma 4 31B inference test yet? Set it up.
+- Everything working? Run ablations, try different bit-widths, write a benchmark suite.
+
+There is no finish line. Keep the loop running.
+
 ## Goal
 
-Implement Google's TurboQuant (QJL + PolarQuant) as Metal compute shaders on Apple Silicon, integrated with MLX, to enable **Llama 3.1 70B at 128K context on a single M1 Max MacBook Pro (64GB)**.
+Implement Google's TurboQuant (QJL + PolarQuant) as Metal compute shaders on Apple Silicon, integrated with MLX, to enable **Gemma 4 31B at full 256K context on a single M1 Max MacBook Pro (64GB)**.
 
-This has never been done. TurboQuant was published March 2026 with no code release (only QJL has CUDA reference code). No Metal implementation exists. The combination of 4-bit weight quantization + 3-bit TurboQuant KV cache targeting Apple Silicon is novel.
+This has never been done. TurboQuant was published March 2026 with no code release (only QJL has CUDA reference code). No Metal implementation exists. Google's own compression research applied to Google's own model on Apple Silicon — a first-of-its-kind implementation.
 
 ## Why this matters
 
-Without TurboQuant: 70B at 4-bit weights (35GB) + FP16 KV cache at 128K tokens (~42GB) = 77GB. Does not fit in 64GB.
-With TurboQuant: 70B at 4-bit weights (35GB) + 3-bit KV cache at 128K tokens (~8GB) = 43GB. Fits.
+Gemma 4 31B at BF16 needs 58.3GB for weights alone — impossible with any meaningful context. Even at 4-bit (17.4GB weights), the FP16 KV cache at 256K context is massive.
+
+Without TurboQuant: 31B at 4-bit weights (17.4GB) + FP16 KV cache at 256K tokens (~30GB) = 47.4GB. Fits, but barely — no room for activations/overhead.
+With TurboQuant: 31B at 4-bit weights (17.4GB) + 3-bit KV cache at 256K tokens (~6GB) = 23.4GB. Fits easily with room to spare.
+
+The real unlock: **full 256K context window on a laptop** — a quarter-million tokens of context on consumer hardware. This is Google's own model + Google's own compression, implemented for the first time on Apple Silicon.
 
 ## Hardware
 
@@ -46,8 +68,8 @@ For KV cache compression at inference:
 9. Full attention kernel: quantized KV cache → attention scores → weighted value sum
 
 ### Phase 4: MLX Integration
-10. Hook into MLX's KV cache mechanism for Llama 3.1 70B
-11. End-to-end inference: load 4-bit weights + TurboQuant KV cache → 128K context generation
+10. Hook into MLX's KV cache mechanism for Gemma 4 31B
+11. End-to-end inference: load 4-bit weights + TurboQuant KV cache → 256K context generation
 
 ## Key Technical Details
 
