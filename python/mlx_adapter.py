@@ -106,38 +106,58 @@ class TurboQuantCache:
         return self._keys_decompressed, self._values_decompressed
 
     def _quantize_polar(self, x: mx.array) -> dict:
-        """PolarQuant-only quantization for values."""
+        """PolarQuant quantization using fused Metal kernel."""
+        from polar_fused_quantize import fused_polar_quantize
+
         D = self.config.embed_dim
-        block_size = self.config.polar_block_size
+        orig_shape = x.shape  # (B, H, N, D)
 
+        # Precondition (MLX native matmul — fast)
         y = x @ self.compressor.precondition.T
-        y_blocks = y.reshape(*x.shape[:-1], D // block_size, block_size)
-        angles, radius = self.polar.forward_polar(y_blocks)
 
-        angle_indices = []
-        for level, (angle_arr, codebook) in enumerate(zip(angles, self.polar.codebooks)):
-            diffs = mx.abs(mx.expand_dims(angle_arr, axis=-1) - codebook)
-            indices = mx.argmin(diffs, axis=-1)
-            angle_indices.append(indices)
+        # Fused Metal: polar_forward + codebook_nearest in one dispatch
+        y_flat = y.reshape(-1)  # flatten all dims for Metal
+        idx_l1, idx_l2, idx_l3, idx_l4, radii = fused_polar_quantize(
+            y_flat, self.polar.codebooks
+        )
+
+        # Reshape back to (B, H, N, ...)
+        n_blocks = D // self.config.polar_block_size
+        batch_shape = list(orig_shape[:-1])  # (B, H, N)
+        angle_indices = [
+            idx_l1.reshape(*batch_shape, n_blocks, -1),
+            idx_l2.reshape(*batch_shape, n_blocks, -1),
+            idx_l3.reshape(*batch_shape, n_blocks, -1),
+            idx_l4.reshape(*batch_shape, n_blocks, -1),
+        ]
+        radii_shaped = radii.reshape(*batch_shape, n_blocks, 1)
 
         return {
             "angle_indices": angle_indices,
-            "radius": radius.astype(mx.float16),
+            "radius": radii_shaped.astype(mx.float16),
         }
 
     def _dequantize_polar(self, compressed: dict) -> mx.array:
-        """Reconstruct from PolarQuant compressed representation."""
+        """Reconstruct from PolarQuant using Metal inverse kernel."""
+        from polar_metal import polar_inverse_metal
+
         angle_indices = compressed["angle_indices"]
         radius = compressed["radius"].astype(mx.float32)
-
-        quantized_angles = []
-        for level_idx, codebook in zip(angle_indices, self.polar.codebooks):
-            quantized_angles.append(codebook[level_idx])
-
-        y_recon_blocks = self.polar.inverse_polar(quantized_angles, radius)
         D = self.config.embed_dim
-        shape = list(y_recon_blocks.shape[:-2]) + [D]
-        y_recon = y_recon_blocks.reshape(*shape)
+
+        # Flatten indices for Metal kernel
+        flat_indices = [idx.reshape(-1).astype(mx.uint32) for idx in angle_indices]
+        flat_radius = radius.reshape(-1)
+
+        # Metal inverse polar
+        y_flat = polar_inverse_metal(
+            self.polar.codebooks, flat_indices, flat_radius,
+            block_size=self.config.polar_block_size,
+        )
+
+        # Reshape and inverse precondition
+        target_shape = list(radius.shape[:-2]) + [D]
+        y_recon = y_flat.reshape(*target_shape)
         return y_recon @ self.compressor.precondition
 
     def __len__(self):
