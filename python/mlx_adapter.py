@@ -92,18 +92,30 @@ class TurboQuantCache:
         new_keys_decompressed = self._dequantize_polar(new_keys_q)
         new_values_decompressed = self._dequantize_polar(new_values_q)
 
-        if self._keys_decompressed is None:
-            self._keys_decompressed = new_keys_decompressed
-            self._values_decompressed = new_values_decompressed
-        else:
-            self._keys_decompressed = mx.concatenate(
-                [self._keys_decompressed, new_keys_decompressed], axis=2
-            )
-            self._values_decompressed = mx.concatenate(
-                [self._values_decompressed, new_values_decompressed], axis=2
-            )
+        n_new = keys.shape[2]
 
-        return self._keys_decompressed, self._values_decompressed
+        if self._keys_decompressed is None or (self._decompressed_offset + n_new) > self._keys_decompressed.shape[2]:
+            # Allocate or expand buffer (pre-allocate in chunks of 256)
+            alloc_step = 256
+            n_alloc = ((self._decompressed_offset + n_new + alloc_step - 1) // alloc_step) * alloc_step
+            B, H, _, D = new_keys_decompressed.shape
+            new_k_buf = mx.zeros((B, H, n_alloc, D), dtype=new_keys_decompressed.dtype)
+            new_v_buf = mx.zeros((B, H, n_alloc, D), dtype=new_values_decompressed.dtype)
+            if self._keys_decompressed is not None:
+                new_k_buf[..., :self._decompressed_offset, :] = self._keys_decompressed[..., :self._decompressed_offset, :]
+                new_v_buf[..., :self._decompressed_offset, :] = self._values_decompressed[..., :self._decompressed_offset, :]
+            self._keys_decompressed = new_k_buf
+            self._values_decompressed = new_v_buf
+
+        # Slice assignment (no concatenation!)
+        self._keys_decompressed[..., self._decompressed_offset:self._decompressed_offset + n_new, :] = new_keys_decompressed
+        self._values_decompressed[..., self._decompressed_offset:self._decompressed_offset + n_new, :] = new_values_decompressed
+        self._decompressed_offset += n_new
+
+        return (
+            self._keys_decompressed[..., :self._decompressed_offset, :],
+            self._values_decompressed[..., :self._decompressed_offset, :],
+        )
 
     def _quantize_polar(self, x: mx.array) -> dict:
         """PolarQuant quantization using fused Metal kernel."""
