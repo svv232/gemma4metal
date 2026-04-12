@@ -98,31 +98,66 @@ int main() {
     const int head_dim = 256;
     const float rms_eps = 1e-6f;
     const float scale = 1.0f / std::sqrt((float)head_dim);
-    const int seq_len = 16;
-    const int n_run_layers = 5;  // Run first 5 layers
+    const int seq_len = 1;
+    const int n_run_layers = 5;
+    const int n_decode_steps = 10;  // Generate 10 tokens
+
+    // Pre-dequantize weights for the layers we'll run
+    std::cout << "Pre-dequantizing weights for " << n_run_layers << " layers..." << std::endl;
+    Timer dequant_t;
+    for (int l = 0; l < n_run_layers; l++) {
+        std::string L = "language_model.model.layers." + std::to_string(l) + ".";
+        for (auto& proj : {"self_attn.q_proj", "self_attn.k_proj", "self_attn.v_proj",
+                           "self_attn.o_proj", "mlp.gate_proj", "mlp.up_proj", "mlp.down_proj"}) {
+            std::string key = L + proj;
+            auto dw = dequant_w(W, key);
+            eval(dw);
+            W.insert_or_assign(key + ".dequantized", dw);
+        }
+    }
+    printf("  Dequantized in %.0f ms\n", dequant_t.ms());
 
     auto x = random::normal({1, seq_len, hidden});
     eval(x);
 
     std::cout << "\nRunning " << n_run_layers << " layers (seq=" << seq_len << ")..." << std::endl;
 
+    // Modified run_layer that uses pre-dequantized weights
+    auto run_fast = [&](const array& x, int layer_idx) -> array {
+        std::string L = "language_model.model.layers." + std::to_string(layer_idx) + ".";
+        auto get_w = [&](const char* name) -> const array& { return W.at(L + name + ".dequantized"); };
+
+        auto h = fast::rms_norm(x, array(1.0f) + W.at(L+"input_layernorm.weight"), rms_eps);
+        auto q = matmul(h, transpose(get_w("self_attn.q_proj")));
+        auto k = matmul(h, transpose(get_w("self_attn.k_proj")));
+        auto v = matmul(h, transpose(get_w("self_attn.v_proj")));
+        int seq = x.shape(1);
+        q = transpose(reshape(q, {1,seq,n_heads,head_dim}), {0,2,1,3});
+        k = transpose(reshape(k, {1,seq,n_kv,head_dim}), {0,2,1,3});
+        v = transpose(reshape(v, {1,seq,n_kv,head_dim}), {0,2,1,3});
+        q = fast::rms_norm(q, array(1.0f)+W.at(L+"self_attn.q_norm.weight"), rms_eps);
+        k = fast::rms_norm(k, array(1.0f)+W.at(L+"self_attn.k_norm.weight"), rms_eps);
+        auto attn = fast::scaled_dot_product_attention(q, k, v, scale);
+        attn = reshape(transpose(attn, {0,2,1,3}), {1, seq, n_heads*head_dim});
+        auto out = x + matmul(attn, transpose(get_w("self_attn.o_proj")));
+        auto h2 = fast::rms_norm(out, array(1.0f)+W.at(L+"pre_feedforward_layernorm.weight"), rms_eps);
+        auto gate = matmul(h2, transpose(get_w("mlp.gate_proj")));
+        auto up = matmul(h2, transpose(get_w("mlp.up_proj")));
+        auto ffn = (gate * sigmoid(gate)) * up;
+        auto ffn_out = matmul(ffn, transpose(get_w("mlp.down_proj")));
+        auto h3 = fast::rms_norm(ffn_out, array(1.0f)+W.at(L+"post_feedforward_layernorm.weight"), rms_eps);
+        return out + h3;
+    };
+
     // Warmup
-    {
-        auto tmp = x;
-        for (int l = 0; l < n_run_layers; l++) {
-            std::string prefix = "language_model.model.layers." + std::to_string(l) + ".";
-            tmp = run_layer(tmp, W, prefix, n_heads, n_kv, head_dim, rms_eps, scale);
-        }
-        eval(tmp);
-    }
+    { auto tmp = x; for (int l = 0; l < n_run_layers; l++) tmp = run_fast(tmp, l); eval(tmp); }
 
     // Benchmark
     Timer bench_t;
     auto out = x;
     for (int l = 0; l < n_run_layers; l++) {
-        std::string prefix = "language_model.model.layers." + std::to_string(l) + ".";
         Timer layer_t;
-        out = run_layer(out, W, prefix, n_heads, n_kv, head_dim, rms_eps, scale);
+        out = run_fast(out, l);
         eval(out);
         printf("  Layer %d: %.1f ms\n", l, layer_t.ms());
     }
