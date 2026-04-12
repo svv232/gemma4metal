@@ -195,9 +195,10 @@ turboquant/
 │   ├── gemma4_multilayer.cpp   #   60-layer forward pass
 │   ├── chat.py / chat_repl.py  #   Python wrappers
 │   └── run_tests.sh            #   Regression tests (5/5)
-├── python/                     # Python extension (nanobind)
+├── python/                     # Python extension (nanobind → pre-compiled Metal)
 │   ├── CMakeLists.txt          #   Pinned nanobind v2.10.2 (MLX 0.31.1 ABI)
-│   ├── tq_bindings.cpp         #   Bindings for sdpa_int4
+│   ├── tq_bindings.cpp         #   Bindings exposing lib/turboquant.metal kernels
+│   ├── setup.py                #   pip-installable
 │   └── requirements.txt        #   mlx>=0.31.0
 ├── tests/
 │   └── test_sdpa_int4.cpp      #   Kernel correctness (max error < 0.00001)
