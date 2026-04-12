@@ -122,14 +122,33 @@ The engine expects weights at `~/.cache/huggingface/hub/models--mlx-community--g
 ### Step 5: Run
 
 ```bash
-# Run inference
-./build/gemma4
+# Verify the build
+./build/test_sdpa_int4          # should print PASS
+bash engine/run_tests.sh        # 5/5 should pass
+```
 
-# Run kernel correctness test (should print PASS)
-./build/test_sdpa_int4
+### Step 6: Chat
 
-# Run regression tests (5/5 should pass)
-bash engine/run_tests.sh
+```bash
+python3.12 engine/chat_repl.py
+```
+
+This starts a streaming multi-turn chat. The model remembers the full conversation. Tokens appear in real-time as they're generated (~10 tok/s).
+
+```
+Gemma 4 31B — TurboQuant Fused int4 SDPA
+Type 'quit' to exit, 'clear' to reset memory
+
+You: What is the capital of France?
+Gemma: The capital of France is Paris.
+  [17 tokens in 1.6s (10.4 tok/s)]
+
+You: And Germany?
+Gemma: The capital of Germany is Berlin.
+  [15 tokens in 1.4s (10.2 tok/s)]
+
+You: clear
+[Memory cleared]
 ```
 
 ## File Structure

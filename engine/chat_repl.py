@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Interactive multi-turn REPL for Gemma 4 31B.
+"""Interactive multi-turn chat with Gemma 4 31B.
 
-Streams tokens as they're generated. Sends full conversation
-history each turn so the model sees all prior context.
-Type 'quit' to exit, 'clear' to reset conversation.
+Streams tokens in real-time. Shows the model's thinking process (dimmed)
+followed by the final response. Full conversation history is sent each turn.
+
+Usage:
+    python3.12 engine/chat_repl.py
+
+Commands:
+    quit  — exit
+    clear — reset conversation memory
 """
-import os, sys, struct, subprocess, re
+import os, sys, struct, subprocess, threading, time
 
-from transformers import AutoTokenizer
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_DIR = os.path.expanduser(
     "~/.cache/huggingface/hub/models--mlx-community--gemma-4-31b-it-4bit/"
     "snapshots/535c5606372deb5d5ab7e29280f111ef2a8e084e/"
@@ -18,34 +22,26 @@ BINARY = os.path.join(ROOT, "build", "gemma4")
 PROMPT_FILE = os.path.join(ROOT, "prompt.bin")
 CACHE_FILE = os.path.join(ROOT, "kv_cache.safetensors")
 
-tok = AutoTokenizer.from_pretrained(MODEL_DIR)
-
-THINK_END = '<channel|>'
-TAG_RE = re.compile(r'<[^>]*\|[^>]*>')
+# Load tokenizer
+try:
+    from mlx_lm import load as _load
+    _, tok = _load(MODEL_DIR)
+except ImportError:
+    from transformers import AutoTokenizer
+    tok = AutoTokenizer.from_pretrained(MODEL_DIR)
 
 SYSTEM_PROMPT = """\
-You are Gemma, a helpful AI assistant running locally on a MacBook Pro M1 Max \
-with 64GB of unified memory. You are Google's Gemma 4 31B model, quantized to \
-4-bit and running via TurboQuant — an open-source Metal inference engine built \
-specifically for Apple Silicon.
+You are Gemma, a helpful AI assistant running locally on Apple Silicon. \
+You are Google's Gemma 4 31B model running via a custom Metal inference engine \
+with fused int4 SDPA attention kernels.
 
 You are direct, concise, and knowledgeable. You remember everything the user \
-has said in this conversation. When asked about yourself, you can mention that \
-you are running entirely on-device with no internet connection or cloud API — \
-all computation happens locally on the user's machine at ~10 tokens per second.
+has said in this conversation. Keep responses focused and useful."""
 
-Keep responses focused and useful. Avoid excessive hedging or disclaimers."""
-
-
-def build_prompt(history):
-    # Gemma 4 uses: <|turn>role\n...<turn|>
-    # Model turn starts with: <|turn>model\n<|channel>thought\n<channel|>\n
-    parts = [f"<|turn>system\n{SYSTEM_PROMPT}<turn|>"]
-    for role, text in history:
-        parts.append(f"<|turn>{role}\n{text}<turn|>")
-    # Open model turn with thinking block (model expects this)
-    parts.append("<|turn>model\n<|channel>thought\n<channel|>\n")
-    return "\n".join(parts)
+DIM = "\033[2m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+CYAN = "\033[36m"
 
 
 def write_tokens(tokens):
@@ -55,19 +51,47 @@ def write_tokens(tokens):
             f.write(struct.pack('<i', t))
 
 
-def run_inference_streaming():
-    """Run inference and stream tokens as they arrive."""
+def run_streaming():
+    """Run the C++ engine and stream tokens, separating thought from response."""
     proc = subprocess.Popen(
         [BINARY], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         cwd=ROOT, bufsize=0,
     )
 
-    in_gen = False
-    tok_s = ""
-    response_parts = []
-    pre_buf = ""     # buffer before generation starts
-    tag_buf = ""     # holds partial <...> tags
+    # States: prefill → thinking → answering → done
+    state = "prefill"
+    thought_parts = []
+    answer_parts = []
+    pre_buf = ""
+    tag_buf = ""
     byte_buf = b""
+    tok_s = ""
+
+    # Spinner during prefill
+    spinning = True
+    def spinner():
+        frames = ["thinking.", "thinking..", "thinking..."]
+        i = 0
+        while spinning:
+            sys.stdout.write(f"\r  {DIM}{frames[i % len(frames)]}{RESET}   ")
+            sys.stdout.flush()
+            i += 1
+            time.sleep(0.4)
+        sys.stdout.write("\r" + " " * 30 + "\r")
+        sys.stdout.flush()
+
+    spin_thread = threading.Thread(target=spinner, daemon=True)
+    spin_thread.start()
+
+    def emit(char):
+        """Write a character in the appropriate style for current state."""
+        if state == "thinking":
+            sys.stdout.write(f"{DIM}{char}{RESET}")
+            thought_parts.append(char)
+        elif state == "answering":
+            sys.stdout.write(char)
+            answer_parts.append(char)
+        sys.stdout.flush()
 
     while True:
         byte = proc.stdout.read(1)
@@ -80,56 +104,56 @@ def run_inference_streaming():
             continue
         byte_buf = b""
 
-        if not in_gen:
+        # Wait for "Generating:" marker from the C++ engine
+        if state == "prefill":
             pre_buf += char
             if 'Generating:\n' in pre_buf:
-                in_gen = True
-                sys.stdout.write("\nGemma: ")
+                spinning = False
+                spin_thread.join(timeout=1)
+                state = "thinking"
+                sys.stdout.write(f"  {DIM}thought: ")
                 sys.stdout.flush()
             continue
 
-        # Detect end of generation
-        if char == '\n':
-            # Flush any held tag buffer as text (wasn't a real tag)
-            if tag_buf:
-                sys.stdout.write(tag_buf)
-                sys.stdout.flush()
-                response_parts.append(tag_buf)
-                tag_buf = ""
-            continue
-
-        # Hold back characters that might be part of a tag
+        # Buffer potential tags
         if tag_buf:
             tag_buf += char
-            if '>' in tag_buf:
-                # Complete tag — check if it's a marker to suppress
-                if any(m in tag_buf for m in ['channel', 'turn', 'EOS']):
-                    if '[EOS]' in tag_buf:
-                        break
-                    # Discard the tag
+            if '>' in tag_buf or (tag_buf.startswith('[') and ']' in tag_buf):
+                if 'EOS' in tag_buf or 'eos' in tag_buf:
+                    break
+                elif 'channel|' in tag_buf:
+                    # <channel|> = transition from thinking to answering
+                    if state == "thinking":
+                        sys.stdout.write(f"{RESET}\n")
+                        state = "answering"
+                        sys.stdout.write(f"{BOLD}Gemma:{RESET} ")
+                        sys.stdout.flush()
+                    tag_buf = ""
+                elif '|channel' in tag_buf:
+                    # <|channel> = start of thinking (already in thinking state)
+                    tag_buf = ""
+                elif 'turn|' in tag_buf or '|turn' in tag_buf:
                     tag_buf = ""
                 else:
-                    # Not a known marker, print it
-                    sys.stdout.write(tag_buf)
-                    sys.stdout.flush()
-                    response_parts.append(tag_buf)
+                    emit(tag_buf)
                     tag_buf = ""
-            elif len(tag_buf) > 20:
-                # Too long to be a tag, flush it
-                sys.stdout.write(tag_buf)
-                sys.stdout.flush()
-                response_parts.append(tag_buf)
+            elif len(tag_buf) > 30:
+                emit(tag_buf)
                 tag_buf = ""
-        elif char == '<':
+        elif char in '<[':
             tag_buf = char
-        elif char == '[':
-            tag_buf = char
+        elif char == '\n':
+            if tag_buf:
+                emit(tag_buf)
+                tag_buf = ""
+            if state == "answering":
+                emit(char)
         else:
-            sys.stdout.write(char)
-            sys.stdout.flush()
-            response_parts.append(char)
+            emit(char)
 
-    # Grab stats from remaining output
+    spinning = False
+
+    # Extract speed
     try:
         remaining = proc.stdout.read().decode("utf-8", errors="replace")
         for line in remaining.split('\n'):
@@ -140,21 +164,25 @@ def run_inference_streaming():
         pass
 
     proc.wait()
-    return "".join(response_parts).strip(), tok_s
+    return "".join(answer_parts).strip(), tok_s
 
 
-if __name__ == "__main__":
+def main():
+    if not os.path.exists(BINARY):
+        print(f"Error: {BINARY} not found. Run 'cd build && cmake .. && make -j8' first.")
+        sys.exit(1)
+
     if os.path.exists(CACHE_FILE):
         os.remove(CACHE_FILE)
 
-    print("Gemma 4 31B — Interactive Chat (streaming)")
-    print("Type 'quit' to exit, 'clear' to reset\n")
+    print(f"{BOLD}Gemma 4 31B{RESET} — TurboQuant Fused int4 SDPA")
+    print(f"Type 'quit' to exit, 'clear' to reset memory\n")
 
     history = []
 
     while True:
         try:
-            user_input = input("You: ").strip()
+            user_input = input(f"{BOLD}You:{RESET} ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nBye!")
             break
@@ -167,28 +195,34 @@ if __name__ == "__main__":
             history = []
             if os.path.exists(CACHE_FILE):
                 os.remove(CACHE_FILE)
-            print("[Conversation cleared]\n")
+            print("[Memory cleared]\n")
             continue
 
         history.append(("user", user_input))
-
-        # Use the tokenizer's own chat template for correct formatting
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         for role, text in history:
             messages.append({"role": role, "content": text})
+
         prompt = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         tokens = tok.encode(prompt, add_special_tokens=False)
+
+        if len(tokens) > 900:
+            print(f"  {DIM}[context: {len(tokens)} tokens — approaching int4 limit]{RESET}")
+
         write_tokens(tokens)
 
-        # Fresh prefill with full conversation history each turn
         if os.path.exists(CACHE_FILE):
             os.remove(CACHE_FILE)
 
-        response, tok_s = run_inference_streaming()
+        response, tok_s = run_streaming()
         print()
         if tok_s:
-            print(f"  [{tok_s}]")
+            print(f"  {DIM}{tok_s}{RESET}")
         print()
 
         if response:
             history.append(("model", response))
+
+
+if __name__ == "__main__":
+    main()
