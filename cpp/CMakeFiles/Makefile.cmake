@@ -7,13 +7,6 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/share/cmake/MLX/MLXConfig.cmake"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/share/cmake/MLX/MLXConfigVersion.cmake"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/share/cmake/MLX/MLXTargets-release.cmake"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/share/cmake/MLX/MLXTargets.cmake"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/share/cmake/MLX/extension.cmake"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/cmake/nanobind-config-version.cmake"
-  "/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/cmake/nanobind-config.cmake"
   "CMakeFiles/4.2.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.2.3/CMakeSystem.cmake"
   "CMakeLists.txt"
@@ -32,7 +25,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/opt/homebrew/share/cmake/Modules/CMakeGenericSystem.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeInitializeConfigs.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeLanguageInformation.cmake"
-  "/opt/homebrew/share/cmake/Modules/CMakeParseArguments.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeParseImplicitIncludeInfo.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeParseLibraryArchitecture.cmake"
@@ -87,10 +79,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/opt/homebrew/share/cmake/Modules/Compiler/XL-CXX-DetermineCompiler.cmake"
   "/opt/homebrew/share/cmake/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake"
   "/opt/homebrew/share/cmake/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake"
-  "/opt/homebrew/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
-  "/opt/homebrew/share/cmake/Modules/FindPackageMessage.cmake"
-  "/opt/homebrew/share/cmake/Modules/FindPython.cmake"
-  "/opt/homebrew/share/cmake/Modules/FindPython/Support.cmake"
   "/opt/homebrew/share/cmake/Modules/Internal/CMakeCXXLinkerInformation.cmake"
   "/opt/homebrew/share/cmake/Modules/Internal/CMakeCommonLinkerInformation.cmake"
   "/opt/homebrew/share/cmake/Modules/Internal/CMakeDetermineLinkerId.cmake"
@@ -128,6 +116,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/turboquant_lib.dir/DependInfo.cmake"
   "CMakeFiles/turboquant_metallib.dir/DependInfo.cmake"
-  "CMakeFiles/turboquant_ext.dir/DependInfo.cmake"
-  "CMakeFiles/nanobind-static.dir/DependInfo.cmake"
+  "CMakeFiles/turboquant_test.dir/DependInfo.cmake"
   )

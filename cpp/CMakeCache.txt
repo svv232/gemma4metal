@@ -14,8 +14,8 @@
 # EXTERNAL cache entries
 ########################
 
-//Build as shared library
-BUILD_SHARED_LIBS:BOOL=ON
+//Path to a library.
+ACCELERATE_LIB:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=CMAKE_ADDR2LINE-NOTFOUND
@@ -78,9 +78,6 @@ CMAKE_INSTALL_NAME_TOOL:FILEPATH=/usr/bin/install_name_tool
 //Install path prefix, prepended onto install directories.
 CMAKE_INSTALL_PREFIX:PATH=/usr/local
 
-//No help, variable specified on the command line.
-CMAKE_LIBRARY_OUTPUT_DIRECTORY:UNINITIALIZED=/Users/andromeda/marketing/turboquant/cpp
-
 //Path to a program.
 CMAKE_LINKER:FILEPATH=/usr/bin/ld
 
@@ -137,7 +134,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=turboquant_ext
+CMAKE_PROJECT_NAME:STATIC=turboquant
 
 //Value Computed by CMake
 CMAKE_PROJECT_SPDX_LICENSE:STATIC=
@@ -208,22 +205,22 @@ CMAKE_TAPI:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeD
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Path to a library.
-MLX_LIBRARY:FILEPATH=/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/lib/libmlx.dylib
+FOUNDATION_LIB:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Foundation.framework
 
-//No help, variable specified on the command line.
-Python_EXECUTABLE:UNINITIALIZED=/usr/bin/python3
+//Path to a library.
+METALKIT_LIB:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/MetalKit.framework
 
-//The directory containing a CMake configuration file for nanobind.
-nanobind_DIR:PATH=/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/cmake
-
-//Value Computed by CMake
-turboquant_ext_BINARY_DIR:STATIC=/Users/andromeda/marketing/turboquant/cpp
+//Path to a library.
+METAL_LIB:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Metal.framework
 
 //Value Computed by CMake
-turboquant_ext_IS_TOP_LEVEL:STATIC=ON
+turboquant_BINARY_DIR:STATIC=/Users/andromeda/marketing/turboquant/cpp
 
 //Value Computed by CMake
-turboquant_ext_SOURCE_DIR:STATIC=/Users/andromeda/marketing/turboquant/cpp
+turboquant_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+turboquant_SOURCE_DIR:STATIC=/Users/andromeda/marketing/turboquant/cpp
 
 
 ########################
@@ -359,28 +356,4 @@ CMAKE_TAPI-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
-//Details about finding MLX
-FIND_PACKAGE_MESSAGE_DETAILS_MLX:INTERNAL=[/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/lib/libmlx.dylib][/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include;;/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp;;/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/backend/metal/kernels/metal_3_1][v()]
-//Details about finding Python
-FIND_PACKAGE_MESSAGE_DETAILS_Python:INTERNAL=[/usr/bin/python3][/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/include/python3.9][found components: Interpreter Development.Module ][v3.9.6(3.9)]
-NB_ABI:INTERNAL=39
-NB_DIR:INTERNAL=/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind
-NB_FREE_THREADED:INTERNAL=0
-NB_OPT:INTERNAL=$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>
-NB_OPT_SIZE:INTERNAL=$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>
-NB_SUFFIX:INTERNAL=.cpython-39-darwin.so
-NB_SUFFIX_S:INTERNAL=.abi3.so
-//Compiler reason failure
-_Python_Compiler_REASON_FAILURE:INTERNAL=
-_Python_DEVELOPMENT_MODULE_SIGNATURE:INTERNAL=5aa1a37d846a96b6ed233f72e77e197e
-//Development reason failure
-_Python_Development_REASON_FAILURE:INTERNAL=
-_Python_EXECUTABLE:INTERNAL=/usr/bin/python3
-//Path to a file.
-_Python_INCLUDE_DIR:INTERNAL=/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/include/python3.9
-//Python Properties
-_Python_INTERPRETER_PROPERTIES:INTERNAL=Python;3;9;6;64;<none>;cpython-39-darwin;abi3;/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9;/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9;/Library/Python/3.9/site-packages;/Library/Python/3.9/site-packages
-_Python_INTERPRETER_SIGNATURE:INTERNAL=e4651144cf83e5138c01a27471bec7d2
-//NumPy reason failure
-_Python_NumPy_REASON_FAILURE:INTERNAL=
 

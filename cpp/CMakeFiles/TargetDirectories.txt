@@ -1,6 +1,5 @@
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_lib.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_metallib.dir
-/Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_ext.dir
-/Users/andromeda/marketing/turboquant/cpp/CMakeFiles/nanobind-static.dir
+/Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_test.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/edit_cache.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/rebuild_cache.dir

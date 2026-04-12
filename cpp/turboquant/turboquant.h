@@ -73,4 +73,57 @@ array polar_dequantize(
     int block_size = 16,
     StreamOrDevice s = {});
 
+// Compressed-domain SDPA: score directly from compressed keys
+class CompressedSDPA : public Primitive {
+ public:
+  CompressedSDPA(Stream stream, int block_size, float scale)
+      : Primitive(stream), block_size_(block_size), scale_(scale) {}
+
+  void eval_cpu(const std::vector<array>& inputs,
+                std::vector<array>& outputs) override;
+  void eval_gpu(const std::vector<array>& inputs,
+                std::vector<array>& outputs) override;
+
+  const char* name() const override { return "CompressedSDPA"; }
+
+  bool is_equivalent(const Primitive& other) const override {
+    auto& o = static_cast<const CompressedSDPA&>(other);
+    return block_size_ == o.block_size_ && scale_ == o.scale_;
+  }
+
+ private:
+  int block_size_;
+  float scale_;
+};
+
+// Compressed attention: scores from compressed keys + softmax + value weighted sum
+array compressed_sdpa(
+    const array& queries,       // (Nq, D) preconditioned queries (Pq)
+    const array& indices_l1,    // compressed key indices
+    const array& indices_l2,
+    const array& indices_l3,
+    const array& indices_l4,
+    const array& radii,
+    const array& cb_l1,
+    const array& cb_l2,
+    const array& cb_l3,
+    const array& cb_l4,
+    const array& values,        // (N, D)
+    int block_size = 16,
+    float scale = 0.0884f,      // 1/sqrt(128)
+    StreamOrDevice s = {});
+
+// Compressed scoring only: outputs (Nq, N) scores from compressed keys
+array compressed_score(
+    const array& queries,
+    const array& indices_l1, const array& indices_l2,
+    const array& indices_l3, const array& indices_l4,
+    const array& radii,
+    const array& cb_l1, const array& cb_l2,
+    const array& cb_l3, const array& cb_l4,
+    int N, int block_size = 16, float scale = 0.0884f,
+    StreamOrDevice s = {});
+
+void set_metallib_path(const std::string& path);
+
 }  // namespace turboquant

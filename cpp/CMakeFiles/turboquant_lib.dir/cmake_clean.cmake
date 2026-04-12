@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o"
   "CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o.d"
-  "libturboquant_lib.dylib"
+  "libturboquant_lib.a"
   "libturboquant_lib.pdb"
 )
 

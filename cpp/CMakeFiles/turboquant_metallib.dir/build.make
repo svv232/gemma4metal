@@ -69,8 +69,9 @@ include CMakeFiles/turboquant_metallib.dir/progress.make
 CMakeFiles/turboquant_metallib: turboquant.metallib
 
 turboquant.metallib: turboquant/turboquant.metal
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/andromeda/marketing/turboquant/cpp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building turboquant.metallib"
-	xcrun -sdk macosx metal -I/Users/andromeda/marketing/turboquant/cpp -I/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include -I/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp -I/Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/backend/metal/kernels/metal_3_1 -Wall -Wextra -fno-fast-math -Wno-c++17-extensions /Users/andromeda/marketing/turboquant/cpp/turboquant/turboquant.metal -o /Users/andromeda/marketing/turboquant/cpp/turboquant.metallib
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/andromeda/marketing/turboquant/cpp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Compiling TurboQuant Metal kernels"
+	xcrun -sdk macosx metal -c /Users/andromeda/marketing/turboquant/cpp/turboquant/turboquant.metal -I /tmp/mlx-source -o /Users/andromeda/marketing/turboquant/cpp/turboquant.air
+	xcrun -sdk macosx metallib /Users/andromeda/marketing/turboquant/cpp/turboquant.air -o /Users/andromeda/marketing/turboquant/cpp/turboquant.metallib
 
 CMakeFiles/turboquant_metallib.dir/codegen:
 .PHONY : CMakeFiles/turboquant_metallib.dir/codegen

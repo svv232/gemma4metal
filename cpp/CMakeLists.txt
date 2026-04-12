@@ -1,54 +1,59 @@
 cmake_minimum_required(VERSION 3.27)
-project(turboquant_ext LANGUAGES CXX)
+project(turboquant LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-option(BUILD_SHARED_LIBS "Build as shared library" ON)
 
-find_package(Python 3.9 COMPONENTS Interpreter Development.Module REQUIRED)
+# Use source-built MLX
+set(MLX_SOURCE_DIR "/tmp/mlx-source")
+set(MLX_BUILD_DIR "/tmp/mlx-source/build")
 
-execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  OUTPUT_VARIABLE nanobind_ROOT)
-find_package(nanobind CONFIG REQUIRED)
-
-execute_process(
-  COMMAND "${Python_EXECUTABLE}" -c "import mlx; print(mlx.__path__[0])"
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  OUTPUT_VARIABLE MLX_ROOT)
-set(MLX_DIR "${MLX_ROOT}/share/cmake/MLX")
-find_package(MLX CONFIG REQUIRED)
-
-# C++ library
-add_library(turboquant_lib)
-target_sources(turboquant_lib PUBLIC turboquant/turboquant.cpp)
-target_include_directories(turboquant_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(turboquant_lib PUBLIC mlx)
-
-# Metal kernels
-if(MLX_BUILD_METAL)
-  mlx_build_metallib(
-    TARGET turboquant_metallib
-    TITLE turboquant
-    SOURCES ${CMAKE_CURRENT_LIST_DIR}/turboquant/turboquant.metal
-    INCLUDE_DIRS ${PROJECT_SOURCE_DIR} ${MLX_INCLUDE_DIRS}
-    OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-  add_dependencies(turboquant_lib turboquant_metallib)
-endif()
-
-# Python bindings — NB_DOMAIN mlx is the key!
-nanobind_add_module(
-  turboquant_ext
-  NB_STATIC
-  STABLE_ABI
-  LTO
-  NOMINSIZE
-  NB_DOMAIN mlx
-  turboquant/bindings.cpp
+# MLX library and headers
+add_library(mlx STATIC IMPORTED)
+set_target_properties(mlx PROPERTIES
+  IMPORTED_LOCATION "${MLX_BUILD_DIR}/libmlx.a"
+  INTERFACE_INCLUDE_DIRECTORIES "${MLX_SOURCE_DIR}"
 )
-target_link_libraries(turboquant_ext PRIVATE turboquant_lib)
 
-if(BUILD_SHARED_LIBS)
-  target_link_options(turboquant_ext PRIVATE -Wl,-rpath,@loader_path)
-endif()
+# Find Metal framework
+find_library(METAL_LIB Metal)
+find_library(METALKIT_LIB MetalKit)
+find_library(FOUNDATION_LIB Foundation)
+find_library(ACCELERATE_LIB Accelerate)
+
+# TurboQuant library
+add_library(turboquant_lib turboquant/turboquant.cpp)
+target_include_directories(turboquant_lib PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${MLX_SOURCE_DIR}
+  ${MLX_BUILD_DIR}/_deps/metal_cpp-src
+)
+target_link_libraries(turboquant_lib PUBLIC
+  mlx
+  ${METAL_LIB}
+  ${METALKIT_LIB}
+  ${FOUNDATION_LIB}
+  ${ACCELERATE_LIB}
+)
+
+# Compile Metal kernels to metallib
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib
+  COMMAND xcrun -sdk macosx metal -c
+    ${CMAKE_CURRENT_SOURCE_DIR}/turboquant/turboquant.metal
+    -I ${MLX_SOURCE_DIR}
+    -o ${CMAKE_CURRENT_BINARY_DIR}/turboquant.air
+  COMMAND xcrun -sdk macosx metallib
+    ${CMAKE_CURRENT_BINARY_DIR}/turboquant.air
+    -o ${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/turboquant/turboquant.metal
+  COMMENT "Compiling TurboQuant Metal kernels"
+)
+add_custom_target(turboquant_metallib DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib)
+
+# Test executable — pure C++, no Python!
+add_executable(turboquant_test turboquant/test_main.cpp)
+target_link_libraries(turboquant_test PRIVATE turboquant_lib)
+add_dependencies(turboquant_test turboquant_metallib)
+target_compile_definitions(turboquant_test PRIVATE
+  METALLIB_PATH="${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib"
+)

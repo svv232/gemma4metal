@@ -143,294 +143,41 @@ turboquant_metallib/fast:
 .PHONY : turboquant_metallib/fast
 
 #=============================================================================
-# Target rules for targets named turboquant_ext
+# Target rules for targets named turboquant_test
 
 # Build rule for target.
-turboquant_ext: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 turboquant_ext
-.PHONY : turboquant_ext
+turboquant_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 turboquant_test
+.PHONY : turboquant_test
 
 # fast build rule for target.
-turboquant_ext/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/build
-.PHONY : turboquant_ext/fast
+turboquant_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_test.dir/build.make CMakeFiles/turboquant_test.dir/build
+.PHONY : turboquant_test/fast
 
-#=============================================================================
-# Target rules for targets named nanobind-static
-
-# Build rule for target.
-nanobind-static: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 nanobind-static
-.PHONY : nanobind-static
-
-# fast build rule for target.
-nanobind-static/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/build
-.PHONY : nanobind-static/fast
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.o
+turboquant/test_main.o: turboquant/test_main.cpp.o
+.PHONY : turboquant/test_main.o
 
 # target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.o
+turboquant/test_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_test.dir/build.make CMakeFiles/turboquant_test.dir/turboquant/test_main.cpp.o
+.PHONY : turboquant/test_main.cpp.o
 
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.i
+turboquant/test_main.i: turboquant/test_main.cpp.i
+.PHONY : turboquant/test_main.i
 
 # target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.i
+turboquant/test_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_test.dir/build.make CMakeFiles/turboquant_test.dir/turboquant/test_main.cpp.i
+.PHONY : turboquant/test_main.cpp.i
 
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.s
+turboquant/test_main.s: turboquant/test_main.cpp.s
+.PHONY : turboquant/test_main.s
 
 # target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.cpp.s
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.o: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.o
-
-# target to build an object file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.o
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.o
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.i: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.i
-
-# target to preprocess a source file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.i
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.i
-
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.s: Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.s
-
-# target to generate assembly for a file
-Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nanobind-static.dir/build.make CMakeFiles/nanobind-static.dir/Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.s
-.PHONY : Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.cpp.s
-
-turboquant/bindings.o: turboquant/bindings.cpp.o
-.PHONY : turboquant/bindings.o
-
-# target to build an object file
-turboquant/bindings.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/turboquant/bindings.cpp.o
-.PHONY : turboquant/bindings.cpp.o
-
-turboquant/bindings.i: turboquant/bindings.cpp.i
-.PHONY : turboquant/bindings.i
-
-# target to preprocess a source file
-turboquant/bindings.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/turboquant/bindings.cpp.i
-.PHONY : turboquant/bindings.cpp.i
-
-turboquant/bindings.s: turboquant/bindings.cpp.s
-.PHONY : turboquant/bindings.s
-
-# target to generate assembly for a file
-turboquant/bindings.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/turboquant/bindings.cpp.s
-.PHONY : turboquant/bindings.cpp.s
+turboquant/test_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_test.dir/build.make CMakeFiles/turboquant_test.dir/turboquant/test_main.cpp.s
+.PHONY : turboquant/test_main.cpp.s
 
 turboquant/turboquant.o: turboquant/turboquant.cpp.o
 .PHONY : turboquant/turboquant.o
@@ -438,7 +185,6 @@ turboquant/turboquant.o: turboquant/turboquant.cpp.o
 # target to build an object file
 turboquant/turboquant.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_lib.dir/build.make CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/turboquant/turboquant.cpp.o
 .PHONY : turboquant/turboquant.cpp.o
 
 turboquant/turboquant.i: turboquant/turboquant.cpp.i
@@ -447,7 +193,6 @@ turboquant/turboquant.i: turboquant/turboquant.cpp.i
 # target to preprocess a source file
 turboquant/turboquant.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_lib.dir/build.make CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/turboquant/turboquant.cpp.i
 .PHONY : turboquant/turboquant.cpp.i
 
 turboquant/turboquant.s: turboquant/turboquant.cpp.s
@@ -456,7 +201,6 @@ turboquant/turboquant.s: turboquant/turboquant.cpp.s
 # target to generate assembly for a file
 turboquant/turboquant.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_lib.dir/build.make CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_ext.dir/build.make CMakeFiles/turboquant_ext.dir/turboquant/turboquant.cpp.s
 .PHONY : turboquant/turboquant.cpp.s
 
 # Help Target
@@ -468,42 +212,11 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... turboquant_metallib"
-	@echo "... nanobind-static"
-	@echo "... turboquant_ext"
 	@echo "... turboquant_lib"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/common.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/error.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/implicit.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_enum.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_func.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_internals.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_ndarray.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_static_property.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/nb_type.s"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.o"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.i"
-	@echo "... Users/andromeda/Library/Python/3.9/lib/python/site-packages/nanobind/src/trampoline.s"
-	@echo "... turboquant/bindings.o"
-	@echo "... turboquant/bindings.i"
-	@echo "... turboquant/bindings.s"
+	@echo "... turboquant_test"
+	@echo "... turboquant/test_main.o"
+	@echo "... turboquant/test_main.i"
+	@echo "... turboquant/test_main.s"
 	@echo "... turboquant/turboquant.o"
 	@echo "... turboquant/turboquant.i"
 	@echo "... turboquant/turboquant.s"

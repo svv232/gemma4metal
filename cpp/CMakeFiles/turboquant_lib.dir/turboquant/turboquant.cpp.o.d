@@ -1,8 +1,7 @@
 CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Users/andromeda/marketing/turboquant/cpp/turboquant/turboquant.cpp \
   /Users/andromeda/marketing/turboquant/cpp/turboquant/turboquant.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/mlx.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/array.h \
+  /tmp/mlx-source/mlx/mlx.h /tmp/mlx-source/mlx/array.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/algorithm \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config_site \
@@ -778,8 +777,7 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_fsfilcnt_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_types/_nl_item.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdarg \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/allocator.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/dtype.h \
+  /tmp/mlx-source/mlx/allocator.h /tmp/mlx-source/mlx/dtype.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/complex \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/sstream \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__ostream/basic_ostream.h \
@@ -797,30 +795,25 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__fwd/stack.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/print \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/unistd.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/types/complex.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/types/half_types.h \
+  /tmp/mlx-source/mlx/types/complex.h \
+  /tmp/mlx-source/mlx/types/half_types.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/arm_fp16.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/types/bf16.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/event.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/stream.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/device.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/small_vector.h \
+  /tmp/mlx-source/mlx/types/bf16.h /tmp/mlx-source/mlx/event.h \
+  /tmp/mlx-source/mlx/stream.h /tmp/mlx-source/mlx/device.h \
+  /tmp/mlx-source/mlx/small_vector.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cassert \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/assert.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_static_assert.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/backend/cuda/cuda.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/backend/gpu/available.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/backend/metal/metal.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/compile.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/distributed/distributed.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/utils.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/distributed/ops.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/einsum.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/export.h \
+  /tmp/mlx-source/mlx/backend/cuda/cuda.h \
+  /tmp/mlx-source/mlx/backend/gpu/available.h \
+  /tmp/mlx-source/mlx/backend/metal/metal.h \
+  /tmp/mlx-source/mlx/compile.h \
+  /tmp/mlx-source/mlx/distributed/distributed.h \
+  /tmp/mlx-source/mlx/utils.h /tmp/mlx-source/mlx/distributed/ops.h \
+  /tmp/mlx-source/mlx/einsum.h /tmp/mlx-source/mlx/export.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/set \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__tree \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/export_impl.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/io/load.h \
+  /tmp/mlx-source/mlx/export_impl.h /tmp/mlx-source/mlx/io/load.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/fcntl.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/fcntl.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_o_sync.h \
@@ -834,7 +827,7 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_select.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_uuid_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/gethostuuid.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/threadpool.h \
+  /tmp/mlx-source/mlx/threadpool.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/condition_variable \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__stop_token/stop_callback.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__stop_token/intrusive_shared_ptr.h \
@@ -849,24 +842,19 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/forward_list \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/thread \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__thread/this_thread.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/fast.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/fft.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/io.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/linalg.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/ops.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/memory.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/random.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/transforms.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/version.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/primitives.h \
+  /tmp/mlx-source/mlx/fast.h /tmp/mlx-source/mlx/fft.h \
+  /tmp/mlx-source/mlx/io.h /tmp/mlx-source/mlx/linalg.h \
+  /tmp/mlx-source/mlx/ops.h /tmp/mlx-source/mlx/memory.h \
+  /tmp/mlx-source/mlx/random.h /tmp/mlx-source/mlx/transforms.h \
+  /tmp/mlx-source/mlx/version.h /tmp/mlx-source/mlx/primitives.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/unordered_set \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/mlx/backend/metal/device.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/Metal.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLAccelerationStructure.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLDefines.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/../Foundation/NSDefines.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLHeaderBridge.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLPrivate.hpp \
+  /tmp/mlx-source/mlx/backend/metal/device.h \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/Metal.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLAccelerationStructure.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLDefines.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/../Foundation/NSDefines.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLHeaderBridge.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLPrivate.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/objc/runtime.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/objc/objc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/objc/objc-api.h \
@@ -874,12 +862,12 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/TargetConditionals.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdbool.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/Foundation.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSArray.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSObject.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSDefines.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSPrivate.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSTypes.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/Foundation.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSArray.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSObject.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSDefines.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSPrivate.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSTypes.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers/CoreFoundation.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/float.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/float.h \
@@ -979,25 +967,25 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers/CFXMLNode.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers/CFXMLParser.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/objc/message.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSEnumerator.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSAutoreleasePool.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSBundle.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSNotification.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSDictionary.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSString.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSObjCRuntime.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSRange.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSData.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSDate.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSError.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSLock.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSNumber.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSProcessInfo.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSSet.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSSharedPtr.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Foundation/NSURL.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLAccelerationStructureTypes.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLResource.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSEnumerator.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSAutoreleasePool.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSBundle.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSNotification.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSDictionary.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSString.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSObjCRuntime.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSRange.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSData.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSDate.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSError.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSLock.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSNumber.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSProcessInfo.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSSet.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSSharedPtr.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Foundation/NSURL.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLAccelerationStructureTypes.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLResource.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/mach.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/std_types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/vm_types.h \
@@ -1074,14 +1062,14 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/machine/rpc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/arm/rpc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/mach/mach_error.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLAllocation.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLStageInputOutputDescriptor.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/../Foundation/NSRange.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLTypes.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLAccelerationStructureCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLArgument.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLTexture.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLPixelFormat.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLAllocation.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLStageInputOutputDescriptor.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/../Foundation/NSRange.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLTypes.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLAccelerationStructureCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLArgument.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLTexture.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLPixelFormat.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOSurface.framework/Headers/IOSurfaceRef.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOSurface.framework/Headers/IOSurfaceBase.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/xpc/xpc.h \
@@ -1104,54 +1092,54 @@ CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/xpc/listener.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/launch.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOSurface.framework/Headers/IOSurfaceTypes.h \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLArgumentEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLBinaryArchive.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLBlitCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLBlitPass.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLBuffer.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLCaptureManager.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLCaptureScope.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/../Foundation/NSObject.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/../Foundation/NSString.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLCommandBuffer.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLCommandQueue.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLComputeCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLComputePass.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLComputePipeline.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLPipeline.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLCounters.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLDepthStencil.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLDevice.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLDrawable.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLDynamicLibrary.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLEvent.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLFence.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLFunctionConstantValues.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLFunctionDescriptor.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLFunctionHandle.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLLibrary.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLFunctionLog.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLFunctionStitching.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLHeap.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLIndirectCommandBuffer.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLIndirectCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLRenderCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLRenderPass.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLIntersectionFunctionTable.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLIOCommandBuffer.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLIOCommandQueue.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLIOCompressor.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLLinkedFunctions.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLLogState.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLParallelRenderCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLRasterizationRate.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLRenderPipeline.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLResidencySet.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLResourceStateCommandEncoder.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLResourceStatePass.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLSampler.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLVertexDescriptor.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLVisibleFunctionTable.hpp \
-  /Users/andromeda/Library/Python/3.9/lib/python/site-packages/mlx/include/metal_cpp/Metal/MTLVersion.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLArgumentEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLBinaryArchive.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLBlitCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLBlitPass.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLBuffer.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLCaptureManager.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLCaptureScope.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/../Foundation/NSObject.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/../Foundation/NSString.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLCommandBuffer.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLCommandQueue.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLComputeCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLComputePass.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLComputePipeline.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLPipeline.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLCounters.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLDepthStencil.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLDevice.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLDrawable.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLDynamicLibrary.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLEvent.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLFence.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLFunctionConstantValues.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLFunctionDescriptor.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLFunctionHandle.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLLibrary.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLFunctionLog.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLFunctionStitching.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLHeap.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLIndirectCommandBuffer.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLIndirectCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLRenderCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLRenderPass.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLIntersectionFunctionTable.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLIOCommandBuffer.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLIOCommandQueue.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLIOCompressor.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLLinkedFunctions.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLLogState.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLParallelRenderCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLRasterizationRate.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLRenderPipeline.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLResidencySet.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLResourceStateCommandEncoder.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLResourceStatePass.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLSampler.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLVertexDescriptor.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLVisibleFunctionTable.hpp \
+  /tmp/mlx-source/build/_deps/metal_cpp-src/Metal/MTLVersion.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/shared_mutex
