@@ -1,105 +1,117 @@
-# TurboQuant — Gemma 4 31B Inference on Apple Silicon
+# TurboQuant — Fast Gemma 4 31B on Apple Silicon
 
 ## CRITICAL: Never Stop
 
-This is an open-ended research and engineering project. There is ALWAYS more to do.
+This is an open-ended research and engineering project. There is ALWAYS more to do. After every experiment, immediately start the next one.
 
-## What We Built (86 experiments)
+## Goal
 
-**Gemma 4 31B running on a single M1 Max MacBook Pro (64GB)** with auto-adaptive KV cache compression, chunked prefill for 4K+ context, and 10-12 tok/s decode.
+**Make Gemma 4 31B inference FASTER on Apple Silicon using TurboQuant's compressed-domain operations.**
 
-### Performance
-- **10-12 tok/s** decode at short context (int4 mode)
-- **5-9 tok/s** at long context (FP16 mode)
-- **11 ms/tok** prefill, **1 ms** prompt cache reload
-- **Chunked prefill**: enables 4K+ context (tested to 3.8K with needle extraction)
-- **256K context**: 47.9 GB total (FP16 KV 30.5 + weights 17.4) — fits 64GB theoretically
+We have compression (int4 KV = 6.4x). We have correctness (95 experiments validated). Now we need SPEED. The TurboQuant paper's real innovation isn't just smaller KV — it's computing attention scores DIRECTLY from compressed keys without decompressing. Less memory bandwidth = faster inference.
 
-### Auto-Adaptive KV Cache
-- **≤950 tokens**: int4 quantization (6.4x compression, perfect quality)
-- **>950 tokens**: auto-switches to FP16 (2x compression, no quality loss)
-- **Runtime safety**: 950-entry eviction prevents compound error in int4 mode
-- Sliding window causal mask enables >1024 token prefill
+### Current Bottleneck (from profiling)
+- Weight matmuls: **77%** of decode time (memory-bandwidth-bound at 17GB/400GB/s)
+- SDPA (attention): **16%** — this is where TurboQuant can help
+- KV cache quantize/dequant: **2%** — already fast, but we still dequant before SDPA
+- Norms/RoPE: **5%**
 
-## Key Scientific Findings
+### Speed Targets
+| What | Current | Target | How |
+|------|---------|--------|-----|
+| Decode tok/s | 10-12 | 15-20 | Compressed-domain SDPA, speculative decode |
+| SDPA time | ~16ms/tok | ~4ms/tok | `quantized_matmul(Q, K_compressed)` — skip dequant |
+| Prefill ms/tok | 11 | 8 | Batched chunked prefill |
+| Time to first token | 1.7s cold / 0.7s cached | 0.5s | Smaller first chunk |
 
-1. **PolarQuant incompatible with Gemma4**: attn_scale=1.0 amplifies angular quantization error
-2. **QJL correction worsens quality**: +6.5% perplexity (variance > bias in softmax)
-3. **V precision > K precision**: V quantization hurts attention output more than K
-4. **Compound error**: int4/int8 KV compounds across 60 layers, fails beyond ~950 tokens
-5. **FP16 KV works at any length**: the practical solution for long context
-6. **Weight matmuls = 77%** of decode time (KV cache ops = 2%)
+### The TurboQuant Speed Opportunity
 
-## Gemma 4 Architecture (fully decoded)
+Current flow: `K_int4 → dequantize → FP32 K → Q @ K^T → softmax → @ V`
 
-- **60 layers**: 50 sliding_attention (hd=256, nkv=16, window=1024) + 10 full_attention (hd=512, nkv=4)
-- **Norms**: `rms_norm(x) * weight` (NOT `1+weight` like Gemma2)
+TurboQuant flow: `Q @ K_compressed → scores (no dequant!) → softmax → @ V_compressed`
+
+MLX has `quantized_matmul(x, w_quantized)` which computes `x @ dequant(w)^T` WITHOUT materializing the full FP32 tensor. If we reshape Q as the "input" and K_cache as the "weight", we get compressed-domain scoring for free.
+
+For V: same trick — `quantized_matmul(attn_weights, V_quantized)` gives the weighted sum without dequantizing V.
+
+This eliminates the dequant step AND reduces memory bandwidth for the attention computation.
+
+## What We Have (95 experiments)
+
+### Working System
+- **Gemma 4 31B** running in pure C++ with Metal compute shaders
+- **Auto-adaptive KV**: int4 (6.4x, ≤950 tokens) / FP16 (2x, ≤4K)
+- **Chunked prefill**: proper cross-chunk attention masks for >1024 context
+- **10-12 tok/s** decode, **5/5 regression tests**, **streaming REPL**
+- **Prompt caching**: safetensors, 1ms reload
+
+### Gemma 4 Architecture (fully decoded)
+- **60 layers**: 50 sliding (hd=256, nkv=16, window=1024) + 10 global (hd=512, nkv=4)
+- **Norms**: `rms_norm(x) * weight` (NOT `1+weight`)
 - **Attention scale**: 1.0 (q/k norms handle magnitude)
-- **v_norm**: bare RMS norm (no learnable weight, `with_scale=False`)
-- **layer_scalar**: multiplies ENTIRE hidden state at end of layer
-- **RoPE**: sliding=default(theta=10K), global=proportional(theta=1M, 128/512 dims rotated)
-- **Activation**: gelu_pytorch_tanh
-- **V=K**: global layers have no v_proj (attention_k_eq_v=True)
+- **v_norm**: bare RMS norm (no weight)
+- **layer_scalar**: scales entire hidden state at end of layer
+- **RoPE**: sliding=default(theta=10K), global=proportional(theta=1M, 128/512 dims)
+- **Activation**: gelu_pytorch_tanh, **V=K** in global layers
+
+### Key Findings
+1. PolarQuant angular error + attn_scale=1.0 = incompatible (use int4 instead)
+2. QJL correction worsens quality (+6.5% perplexity)
+3. int4 KV compounds across 60 layers — fails beyond ~950 tokens
+4. FP16 (10-bit mantissa) works to 4K; BF16 (8-bit) fails
+5. Chunked prefill with proper cross-chunk masks is essential for >1024
+6. V precision matters more than K for attention output quality
 
 ## Hardware
-
 - Apple M1 Max, 10-core CPU, 32-core GPU, 64GB unified memory
-- Metal 4, 32KB threadgroup memory per threadgroup
+- Memory bandwidth: ~400 GB/s, 32KB threadgroup memory
 
-## Usage
-
+## Quick Start
 ```bash
-# Build
-cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j8
-
-# Interactive chat (tokenizes with Python, runs C++ inference)
-python3 chat_repl.py
-
-# Single prompt (writes to prompt_491.bin, runs binary)
-python3 chat.py "Your question here"
-
-# Direct binary (reads prompt_491.bin or uses default)
-./build/gemma4_multilayer
+cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make gemma4 -j8
+python3 chat.py "What is the capital of France?"
+python3 chat_repl.py   # interactive streaming REPL
+./run_tests.sh          # regression tests (5/5)
 ```
 
 ## File Structure
-
 ```
 turboquant/
 ├── CLAUDE.md                  ← you are here
-├── gemma4_multilayer.cpp      ← main inference (341 lines, auto-adaptive KV)
-├── gemma4_multiturn.cpp       ← multi-turn conversation demo
-├── gemma4_bench.cpp           ← FP32 vs int4 benchmark
-├── turboquant.h               ← Metal kernel API (PolarQuant primitives)
+├── CMakeLists.txt
+├── gemma4_multilayer.cpp      ← main inference engine (350 lines)
+├── turboquant.h               ← PolarQuant Metal kernel API
 ├── turboquant.cpp             ← MLX Primitive implementations
 ├── turboquant.metal           ← Metal compute shaders
-├── chat_repl.py               ← interactive REPL
 ├── chat.py                    ← single-prompt wrapper
-├── vocab.bin                  ← BPE vocabulary for token decoding
-├── CMakeLists.txt             ← build system (links MLX from source)
-├── polar_quality_sweep.cpp    ← PolarQuant codebook quality sweep
-├── kv_precision_sweep.cpp     ← KV bit-width precision analysis
-├── context_scaling.cpp        ← decode speed vs context length
-└── profile_decode.cpp         ← per-component timing breakdown
+├── chat_repl.py               ← streaming interactive REPL
+├── run_tests.sh               ← regression tests (5/5)
+├── vocab.bin                  ← BPE vocabulary
+└── benchmarks/
+    ├── gemma4_bench.cpp       ← FP32 vs int4 comparison
+    ├── context_scaling.cpp    ← throughput vs context length
+    ├── profile_decode.cpp     ← per-component timing
+    ├── kv_precision_sweep.cpp ← K/V bit-width analysis
+    └── polar_quality_sweep.cpp← PolarQuant quality sweep
 ```
 
-## KV Cache Compression Pareto Frontier
+## Implementation Priorities
 
-| Mode | Compression | Max Context | Quality | 256K Memory |
-|------|------------|-------------|---------|-------------|
-| int4 K+V | 6.4x | ~950 tokens | Perfect | 23.4 GB* |
-| FP16 K+V | 2.0x | Any | Perfect | 47.9 GB |
-| FP32 K+V | 1.0x | Any | Perfect | 60.9 GB |
+### Priority 1: Compressed-Domain SDPA (biggest speed win)
+Replace `dequantize(K) → matmul(Q, K^T)` with `quantized_matmul(Q, K_quantized)`.
+Same for V: `quantized_matmul(attn_weights, V_quantized)`.
+Expected: eliminate 16% SDPA overhead, reduce memory bandwidth.
 
-*int4 only for ≤950 tokens due to compound error across 60 layers
+### Priority 2: Speculative Decoding (2x throughput)
+Use Gemma 2 2B (locally available) as draft model. Generate N candidates, verify in parallel with 31B. Acceptance rate ~70% → ~2x effective throughput.
+
+### Priority 3: Fused Metal Attention Kernel
+Write a single Metal kernel that does: read compressed K → compute scores → softmax → read compressed V → weighted sum. One dispatch instead of 4 separate operations. Eliminates intermediate memory traffic.
+
+### Priority 4: Weight Optimization
+Explore 2-bit weight quantization for the FFN layers (54% of decode time). MLX supports 2-bit quantized_matmul. 2-bit FFN + 4-bit attention weights could nearly double decode throughput by halving memory bandwidth for the dominant bottleneck.
 
 ## Papers
 - TurboQuant: arxiv.org/abs/2504.19874 (ICLR 2026)
 - QJL: arxiv.org/abs/2406.03482 (AAAI)
 - PolarQuant: arxiv.org/abs/2502.02617 (AISTATS 2026)
-
-## What's Next
-- Speculative decoding with Gemma 2 2B draft model (2x throughput potential)
-- Chunked prefill for >1024 int4 context (needs proper cross-chunk attention)
-- BFloat16 computation for reduced intermediate memory
-- Weight offloading for models that exceed memory

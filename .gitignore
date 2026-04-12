@@ -1,2 +1,6 @@
+build/
+*.bin
+*.safetensors
 .env
-build
+__pycache__/
+*.pyc
