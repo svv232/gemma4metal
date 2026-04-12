@@ -60,27 +60,20 @@ fig, ax = plt.subplots(figsize=(10, 5))
 style_ax(ax)
 
 ctx2 = [100, 200, 400, 600, 800, 950]
-# Peak memory = weights (17.4GB) + KV cache + attention temporaries
-# Baseline: dequantize K creates a temporary float32 matrix
-# Per layer: nkv_heads * context * head_dim * 4 bytes (for K dequantize)
+# Baseline: dequantize K creates a temporary float32 matrix per layer
 # 50 sliding layers × 16 heads × ctx × 256 × 4 bytes
-base_tmp_mb = [50 * 16 * c * 256 * 4 / 1e6 for c in ctx2]
-tq_tmp_mb = [0] * len(ctx2)  # fused kernel: zero temporaries
+saved_mb = [50 * 16 * c * 256 * 4 / 1e6 for c in ctx2]
 
-ax.bar(np.array(range(len(ctx2))) - 0.18, base_tmp_mb, 0.35, color=BASELINE_COLOR,
-       label='Baseline peak (dequantized K temporary)', edgecolor='white')
-ax.bar(np.array(range(len(ctx2))) + 0.18, tq_tmp_mb, 0.35, color=TQ_COLOR,
-       label='TurboQuant peak (zero temporaries)', edgecolor='white')
+bars = ax.bar(range(len(ctx2)), saved_mb, 0.55, color=TQ_COLOR, edgecolor='white', alpha=0.85)
 
-for i, (bv, ctx_val) in enumerate(zip(base_tmp_mb, ctx2)):
-    ax.text(i - 0.18, bv + 10, f'{bv:.0f} MB', ha='center', fontsize=10, fontweight='bold', color=BASELINE_COLOR)
-    ax.text(i + 0.18, 15, '0 MB', ha='center', fontsize=10, fontweight='bold', color=TQ_COLOR)
+for i, v in enumerate(saved_mb):
+    ax.text(i, v + 12, f'{v:.0f} MB\nsaved', ha='center', fontsize=11, fontweight='bold', color=TQ_COLOR)
 
 ax.set_xticks(range(len(ctx2)))
 ax.set_xticklabels([f'{c} tok' for c in ctx2], fontsize=11)
-ax.set_ylabel('Attention Temporary Memory (MB)', fontsize=12)
-ax.set_title('Peak Memory: TurboQuant Eliminates K Dequantize Temporaries', fontsize=14, fontweight='bold', pad=15)
-ax.legend(fontsize=11, loc='upper left')
+ax.set_ylabel('Memory Saved (MB)', fontsize=12)
+ax.set_title('Peak Memory Saved by Fused Kernel\n(eliminates dequantized K temporaries entirely)', fontsize=14, fontweight='bold', pad=15)
+ax.set_ylim(0, max(saved_mb) * 1.25)
 plt.tight_layout()
 plt.savefig(f'{OUT}/memory_savings.png', dpi=150, bbox_inches='tight')
 print('Saved memory_savings.png')

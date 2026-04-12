@@ -71,28 +71,116 @@ Gemma 4 31B at 4-bit weights needs 17.4 GB. Whether 256K context fits depends on
 | async_eval pipelining | Neutral | Mutable KV cache prevents overlap |
 | Chunked layer eval | Slower | Sync overhead exceeds graph overhead |
 
-## Quick Start
+## Getting Started
+
+### Prerequisites
+
+- macOS with Apple Silicon (M1/M2/M3/M4)
+- Xcode Command Line Tools (`xcode-select --install`)
+- Python 3.12 (`brew install python@3.12`)
+- CMake 3.27+ (`brew install cmake`)
+- ~20 GB free disk space (for model weights)
+
+### Step 1: Clone and set up
 
 ```bash
-# Build
-mkdir build && cd build
+git clone https://github.com/your-org/turboquant.git
+cd turboquant
+```
+
+### Step 2: Build MLX from source
+
+TurboQuant links against MLX's C++ library. Build it once:
+
+```bash
+git clone --depth 1 https://github.com/ml-explore/mlx.git /tmp/mlx-source
+mkdir /tmp/mlx-source/build && cd /tmp/mlx-source/build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DMLX_BUILD_TESTS=OFF -DMLX_BUILD_PYTHON_BINDINGS=OFF
+make -j8
+cd -
+```
+
+### Step 3: Build TurboQuant
+
+```bash
+mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j8
+cd ..
+```
 
-# Run (needs Gemma 4 31B 4-bit from mlx-community on HuggingFace)
-./gemma4
+This produces two binaries in `build/`:
+- `gemma4` — the inference engine
+- `test_sdpa_int4` — kernel correctness test
 
-# Kernel correctness test
-./test_sdpa_int4
+### Step 4: Download model weights
 
-# Regression tests
+```bash
+pip3.12 install huggingface_hub
+python3.12 -c "
+from huggingface_hub import snapshot_download
+snapshot_download('mlx-community/gemma-4-31b-it-4bit', local_dir_links=True)
+"
+```
+
+The engine expects weights at `~/.cache/huggingface/hub/models--mlx-community--gemma-4-31b-it-4bit/`. If your path differs, update the `model_dir` string in `engine/gemma4_multilayer.cpp`.
+
+### Step 5: Run
+
+```bash
+# Run inference
+./build/gemma4
+
+# Run kernel correctness test (should print PASS)
+./build/test_sdpa_int4
+
+# Run regression tests (5/5 should pass)
 bash engine/run_tests.sh
+```
 
-# Python extension
-cd python
-cmake -B /tmp/tq_build -DPython_EXECUTABLE=$(which python3.12)
+### Step 6 (optional): Python extension
+
+To use the fused kernel from Python:
+
+```bash
+# Set up venv
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install mlx>=0.31.0
+
+# Build extension (pins nanobind v2.10.2 to match MLX's ABI)
+cmake -S python -B /tmp/tq_build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=ON \
+  -DPython_EXECUTABLE=$(which python3.12)
 cmake --build /tmp/tq_build -j8
-PYTHONPATH=/tmp/tq_build python3.12 -c "import turboquant_ext; print('OK')"
+
+# Verify
+PYTHONPATH=/tmp/tq_build python3.12 -c "
+import turboquant_ext as tq
+tq.set_metallib_path('/tmp/tq_build/turboquant.metallib')
+print('TurboQuant Python extension loaded')
+"
+```
+
+Usage:
+
+```python
+import turboquant_ext as tq
+import mlx.core as mx
+
+tq.set_metallib_path("/tmp/tq_build/turboquant.metallib")
+
+# queries: (num_heads, head_dim) float32
+# k_quant: (num_kv_heads, N, head_dim/8) uint32  (from mx.quantize)
+# k_scales, k_biases: (num_kv_heads, N, head_dim/64) float32
+result = tq.sdpa_int4(
+    queries, k_quant, k_scales, k_biases,
+    v_quant, v_scales, v_biases,
+    gqa_factor=2,   # num_heads // num_kv_heads
+    scale=1.0,      # attention scale
+    sliding_window=0
+)
 ```
 
 ## File Structure
