@@ -1,10 +1,10 @@
-# Fused int4 Attention for Gemma 4 on Apple Silicon
+# Fused int4 Attention for Gemma 4 31B on Apple Silicon
 
-> I set out to implement TurboQuant (PolarQuant + QJL) for Gemma 4's KV cache. It doesn't work on this model. What I built instead is faster.
+> I set out to implement TurboQuant (PolarQuant + QJL) for Gemma 4 31B's KV cache — a 31 billion parameter model running on a single Mac. It doesn't work on this model. What I built instead is faster.
 
 ## Background: Why TurboQuant Fails on Gemma 4
 
-The [TurboQuant paper](https://arxiv.org/abs/2504.19874) (ICLR 2026) proposes PolarQuant + QJL for KV cache compression. I implemented both as Metal compute shaders and tested them on Gemma 4 31B across 177 experiments.
+The [TurboQuant paper](https://arxiv.org/abs/2504.19874) (ICLR 2026) proposes PolarQuant + QJL for KV cache compression. I implemented both as Metal compute shaders and tested them on the full Gemma 4 31B (4-bit, 17.4 GB) across 177 experiments.
 
 **PolarQuant** encodes key vectors as recursive polar coordinates (radius + angles). On most models this achieves ~7x compression with high quality. On Gemma 4, it produces gibberish. The reason: Gemma 4 uses `attn_scale=1.0` (the Q/K norms handle magnitude instead), which means attention scores are not dampened — a 4% directional error from PolarQuant gets amplified through softmax and compounds across 60 layers.
 
@@ -107,7 +107,9 @@ This produces two binaries in `build/`:
 - `gemma4` — the inference engine
 - `test_sdpa_int4` — kernel correctness test
 
-### Step 4: Download model weights
+### Step 4: Download Gemma 4 31B weights
+
+The model uses [`mlx-community/gemma-4-31b-it-4bit`](https://huggingface.co/mlx-community/gemma-4-31b-it-4bit) — a 4-bit quantized version of Google's Gemma 4 31B-IT (31 billion parameters, 17.4 GB on disk).
 
 ```bash
 pip3.12 install huggingface_hub
