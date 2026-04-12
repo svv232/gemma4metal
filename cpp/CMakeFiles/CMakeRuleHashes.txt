@@ -1,3 +1,0 @@
-# Hashes of file build rules.
-a74e692d778861516a0bd97a0aa8bf55 CMakeFiles/turboquant_metallib
-28b7ace67c9ef7550e6cd9a6db0aede5 turboquant.metallib

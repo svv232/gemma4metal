@@ -1,2 +1,0 @@
-/usr/bin/ar qc libturboquant_lib.a CMakeFiles/turboquant_lib.dir/turboquant/turboquant.cpp.o
-/usr/bin/ranlib libturboquant_lib.a
