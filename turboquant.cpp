@@ -282,6 +282,43 @@ array polar_dequantize_packed(
   return reshape(y, {-1, D});
 }
 
+// Fast packed dequant with precomputed cos/sin (zero trig)
+class PackedPolarDequantizeFast : public Primitive {
+ public:
+  PackedPolarDequantizeFast(Stream stream, int bs) : Primitive(stream), bs_(bs) {}
+  void eval_cpu(const std::vector<array>& i, std::vector<array>& o) override {
+    throw std::runtime_error("GPU only");
+  }
+  void eval_gpu(const std::vector<array>& inputs, std::vector<array>& outputs) override {
+    int N_blocks = inputs[8].size();
+    outputs[0].set_data(allocator::malloc(outputs[0].nbytes()));
+    auto& dev = metal::device(stream().device);
+    auto& enc = dev.get_command_encoder(stream().index);
+    auto* lib = dev.get_library("turboquant", metallib_path);
+    auto* kern = dev.get_kernel("polar_inverse_packed_fast", lib);
+    enc.set_compute_pipeline_state(kern);
+    for (int i = 0; i < 9; i++) enc.set_input_array(inputs[i], i);
+    enc.set_output_array(outputs[0], 9);
+    enc.dispatch_threadgroups(MTL::Size(N_blocks, 1, 1), MTL::Size(1, 1, 1));
+  }
+  const char* name() const override { return "PackedDequantFast"; }
+  bool is_equivalent(const Primitive& other) const override { return true; }
+ private:
+  int bs_;
+};
+
+array polar_dequantize_packed_fast(
+    const array& p1, const array& p2, const array& p3, const array& p4,
+    const array& radii,
+    const array& cs1, const array& cs2, const array& cs3, const array& cs4,
+    int D, int block_size, StreamOrDevice s) {
+  int N_blocks = radii.size();
+  auto p = std::make_shared<PackedPolarDequantizeFast>(to_stream(s), block_size);
+  auto y = array({N_blocks * block_size}, float32, p,
+      {cs1, cs2, cs3, cs4, p1, p2, p3, p4, radii});
+  return reshape(y, {-1, D});
+}
+
 // Compressed scoring primitive
 class CompressedScore : public Primitive {
  public:

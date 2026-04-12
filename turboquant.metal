@@ -651,3 +651,54 @@ kernel void polar_inverse_packed(
     for (uint j = 0; j < 16; j++)
         output[block_idx * 16 + j] = r[j];
 }
+
+// Zero-trig inverse polar: uses precomputed cos/sin tables instead of runtime trig
+// Input: codebook cos/sin pairs (precomputed on CPU)
+kernel void polar_inverse_packed_fast(
+    device const float2* cs_l1       [[buffer(0)]],  // {cos, sin} pairs for L1 (16 entries)
+    device const float2* cs_l2       [[buffer(1)]],  // {cos, sin} for L2 (4 entries)
+    device const float2* cs_l3       [[buffer(2)]],  // {cos, sin} for L3
+    device const float2* cs_l4       [[buffer(3)]],  // {cos, sin} for L4
+    device const uint* packed_l1     [[buffer(4)]],
+    device const uint8_t* packed_l2  [[buffer(5)]],
+    device const uint8_t* packed_l3  [[buffer(6)]],
+    device const uint8_t* packed_l4  [[buffer(7)]],
+    device const half* radii         [[buffer(8)]],
+    device float* output             [[buffer(9)]],
+    uint block_idx                   [[thread_position_in_grid]]
+) {
+    float r[16];
+    r[0] = float(radii[block_idx]);
+
+    // L4: table lookup (zero trig!)
+    { uint idx = packed_l4[block_idx] & 0x3;
+      float2 cs = cs_l4[idx];
+      float r0 = r[0]; r[0] = r0 * cs.x; r[1] = r0 * cs.y; }
+
+    // L3
+    { float t[4]; uint8_t p = packed_l3[block_idx];
+      for (uint j=0;j<2;j++) {
+          float2 cs = cs_l3[(p >> (j*2)) & 0x3];
+          t[2*j]=r[j]*cs.x; t[2*j+1]=r[j]*cs.y;
+      }
+      for (uint j=0;j<4;j++) r[j]=t[j]; }
+
+    // L2
+    { float t[8]; uint8_t p = packed_l2[block_idx];
+      for (uint j=0;j<4;j++) {
+          float2 cs = cs_l2[(p >> (j*2)) & 0x3];
+          t[2*j]=r[j]*cs.x; t[2*j+1]=r[j]*cs.y;
+      }
+      for (uint j=0;j<8;j++) r[j]=t[j]; }
+
+    // L1
+    { float t[16]; uint p = packed_l1[block_idx];
+      for (uint j=0;j<8;j++) {
+          float2 cs = cs_l1[(p >> (j*4)) & 0xF];
+          t[2*j]=r[j]*cs.x; t[2*j+1]=r[j]*cs.y;
+      }
+      for (uint j=0;j<16;j++) r[j]=t[j]; }
+
+    for (uint j = 0; j < 16; j++)
+        output[block_idx * 16 + j] = r[j];
+}

@@ -92,6 +92,16 @@ array polar_dequantize_packed(
     int D, int block_size = 16,
     StreamOrDevice s = {});
 
+// Fast packed dequantize with precomputed cos/sin tables (ZERO trig ops)
+array polar_dequantize_packed_fast(
+    const array& packed_l1, const array& packed_l2,
+    const array& packed_l3, const array& packed_l4,
+    const array& radii,
+    const array& cs_l1, const array& cs_l2,  // float2 arrays: {cos, sin} per codebook entry
+    const array& cs_l3, const array& cs_l4,
+    int D, int block_size = 16,
+    StreamOrDevice s = {});
+
 // Compressed-domain SDPA: score directly from compressed keys
 class CompressedSDPA : public Primitive {
  public:
