@@ -45,12 +45,6 @@ Every attention layer in the baseline allocates a temporary float32 matrix for t
 
 ![Memory Savings](assets/memory_savings.png)
 
-### Python extension: 1.2-1.3x faster than MLX's quantized_matmul
-
-The kernel ships as a nanobind Python extension. Benchmarked against MLX's own `quantized_matmul`-based attention (which is what mlx-lm uses internally):
-
-![Python Kernel Benchmark](assets/python_kernel_benchmark.png)
-
 ## Hardware
 
 Gemma 4 31B at 4-bit weights needs 17.4 GB. Whether 256K context fits depends on KV cache format:
@@ -77,8 +71,8 @@ Gemma 4 31B at 4-bit weights needs 17.4 GB. Whether 256K context fits depends on
 
 - macOS with Apple Silicon (M1/M2/M3/M4)
 - Xcode Command Line Tools (`xcode-select --install`)
-- Python 3.12 (`brew install python@3.12`)
 - CMake 3.27+ (`brew install cmake`)
+- Python 3.12 (`brew install python@3.12`) — only needed for model download and test runner
 - ~20 GB free disk space (for model weights)
 
 ### Step 1: Clone and set up
@@ -138,51 +132,6 @@ The engine expects weights at `~/.cache/huggingface/hub/models--mlx-community--g
 bash engine/run_tests.sh
 ```
 
-### Step 6 (optional): Python extension
-
-To use the fused kernel from Python:
-
-```bash
-# Set up venv
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install mlx>=0.31.0
-
-# Build extension (pins nanobind v2.10.2 to match MLX's ABI)
-cmake -S python -B /tmp/tq_build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=ON \
-  -DPython_EXECUTABLE=$(which python3.12)
-cmake --build /tmp/tq_build -j8
-
-# Verify
-PYTHONPATH=/tmp/tq_build python3.12 -c "
-import turboquant_ext as tq
-tq.set_metallib_path('/tmp/tq_build/turboquant.metallib')
-print('TurboQuant Python extension loaded')
-"
-```
-
-Usage:
-
-```python
-import turboquant_ext as tq
-import mlx.core as mx
-
-tq.set_metallib_path("/tmp/tq_build/turboquant.metallib")
-
-# queries: (num_heads, head_dim) float32
-# k_quant: (num_kv_heads, N, head_dim/8) uint32  (from mx.quantize)
-# k_scales, k_biases: (num_kv_heads, N, head_dim/64) float32
-result = tq.sdpa_int4(
-    queries, k_quant, k_scales, k_biases,
-    v_quant, v_scales, v_biases,
-    gqa_factor=2,   # num_heads // num_kv_heads
-    scale=1.0,      # attention scale
-    sliding_window=0
-)
-```
-
 ## File Structure
 
 ```
@@ -195,11 +144,6 @@ turboquant/
 │   ├── gemma4_multilayer.cpp   #   60-layer forward pass
 │   ├── chat.py / chat_repl.py  #   Python wrappers
 │   └── run_tests.sh            #   Regression tests (5/5)
-├── python/                     # Python extension (nanobind → pre-compiled Metal)
-│   ├── CMakeLists.txt          #   Pinned nanobind v2.10.2 (MLX 0.31.1 ABI)
-│   ├── tq_bindings.cpp         #   Bindings exposing lib/turboquant.metal kernels
-│   ├── setup.py                #   pip-installable
-│   └── requirements.txt        #   mlx>=0.31.0
 ├── tests/
 │   └── test_sdpa_int4.cpp      #   Kernel correctness (max error < 0.00001)
 └── assets/                     #   Benchmark charts

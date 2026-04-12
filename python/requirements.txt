@@ -1,5 +1,0 @@
-# TurboQuant Python extension requirements
-# Install with: pip install -r requirements.txt
-
-mlx>=0.31.0
-nanobind>=2.10.2,<2.11  # must match MLX's nanobind ABI
