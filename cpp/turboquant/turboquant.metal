@@ -420,3 +420,234 @@ kernel void tq_score_parallel(
         }
     }
 }
+
+// Optimized parallel scoring with shared memory block reconstruction
+// One lane per block reconstructs into threadgroup memory
+// All lanes read their elements from shared memory
+// 4x fewer trig ops than tq_score_parallel
+kernel void tq_score_shared(
+    device const float* queries      [[buffer(0)]],
+    device const uint8_t* idx_l1     [[buffer(1)]],
+    device const uint8_t* idx_l2     [[buffer(2)]],
+    device const uint8_t* idx_l3     [[buffer(3)]],
+    device const uint8_t* idx_l4     [[buffer(4)]],
+    device const half* radii         [[buffer(5)]],
+    device const float* cb1          [[buffer(6)]],
+    device const float* cb2          [[buffer(7)]],
+    device const float* cb3          [[buffer(8)]],
+    device const float* cb4          [[buffer(9)]],
+    device float* scores             [[buffer(10)]],
+    device const uint* params_buf    [[buffer(11)]],
+    uint3 tid [[threadgroup_position_in_grid]],
+    uint simd_gid [[simdgroup_index_in_threadgroup]],
+    uint simd_lid [[thread_index_in_simdgroup]]
+) {
+    uint N = params_buf[0];
+    uint D = params_buf[1];
+    uint NB = params_buf[2];
+    float scale = as_type<float>(params_buf[3]);
+
+    constexpr uint BN = 24;
+    uint qk_pt = D / 32;
+    uint head_idx = tid.x;
+    uint key_base = head_idx * N;
+
+    // Shared memory: one reconstructed key per simdgroup (D floats each)
+    // BN simdgroups × D floats = 24 × 128 = 3072 floats = 12KB (fits in 32KB)
+    threadgroup float shared_keys[24 * 128];
+
+    float q[8];
+    for (uint i = 0; i < qk_pt; i++)
+        q[i] = scale * queries[head_idx * D + simd_lid * qk_pt + i];
+
+    for (uint ki = simd_gid; ki < N; ki += BN) {
+        // Phase 1: Reconstruct key into shared memory
+        // Each lane reconstructs one block (lanes 0-7 for NB=8 blocks)
+        // Lanes 8-31 idle during reconstruction
+        if (simd_lid < NB) {
+            uint blk = simd_lid;
+            uint bi = (key_base + ki) * NB + blk;
+            float r[16];
+            r[0] = float(radii[bi]);
+
+            { float th=cb4[idx_l4[bi]]; float r0=r[0]; r[0]=r0*cos(th); r[1]=r0*sin(th); }
+            { float t[4]; for(uint j=0;j<2;j++){float th=cb3[idx_l3[bi*2+j]]; t[2*j]=r[j]*cos(th); t[2*j+1]=r[j]*sin(th);} for(uint j=0;j<4;j++) r[j]=t[j]; }
+            { float t[8]; for(uint j=0;j<4;j++){float th=cb2[idx_l2[bi*4+j]]; t[2*j]=r[j]*cos(th); t[2*j+1]=r[j]*sin(th);} for(uint j=0;j<8;j++) r[j]=t[j]; }
+            { float t[16]; for(uint j=0;j<8;j++){float th=cb1[idx_l1[bi*8+j]]; t[2*j]=r[j]*cos(th); t[2*j+1]=r[j]*sin(th);} for(uint j=0;j<16;j++) r[j]=t[j]; }
+
+            // Write to shared memory
+            for (uint j = 0; j < 16; j++)
+                shared_keys[simd_gid * D + blk * 16 + j] = r[j];
+        }
+
+        // Barrier: wait for all blocks to be reconstructed
+        simdgroup_barrier(mem_flags::mem_threadgroup);
+
+        // Phase 2: All lanes read their elements from shared memory and compute score
+        float score = 0.0f;
+        for (uint i = 0; i < qk_pt; i++) {
+            score += q[i] * shared_keys[simd_gid * D + simd_lid * qk_pt + i];
+        }
+        score = simd_sum(score);
+
+        if (simd_lid == 0) {
+            scores[head_idx * N + ki] = score;
+        }
+
+        simdgroup_barrier(mem_flags::mem_threadgroup);
+    }
+}
+
+// Bit-packed quantize: outputs packed indices instead of uint8
+// Level 1: 8 × 4-bit → 1 uint32 per block
+// Level 2: 4 × 2-bit → 1 uint8 per block  
+// Level 3: 2 × 2-bit → 1 uint8 per block (4 bits used)
+// Level 4: 1 × 2-bit → 1 uint8 per block (2 bits used)
+kernel void polar_quantize_packed(
+    device const float* input        [[buffer(0)]],
+    device const float* cb_l1        [[buffer(1)]],
+    device const float* cb_l2        [[buffer(2)]],
+    device const float* cb_l3        [[buffer(3)]],
+    device const float* cb_l4        [[buffer(4)]],
+    device const uint& n_cb1         [[buffer(5)]],
+    device const uint& n_cb2         [[buffer(6)]],
+    device const uint& n_cb3         [[buffer(7)]],
+    device const uint& n_cb4         [[buffer(8)]],
+    device uint* packed_l1           [[buffer(9)]],  // 1 uint32 per block (8×4bit)
+    device uint8_t* packed_l2        [[buffer(10)]],  // 1 uint8 per block (4×2bit)
+    device uint8_t* packed_l3        [[buffer(11)]],  // 1 uint8 per block (2×2bit)
+    device uint8_t* packed_l4        [[buffer(12)]],  // 1 uint8 per block (1×2bit)
+    device half* radii               [[buffer(13)]],
+    uint block_idx                   [[thread_position_in_grid]]
+) {
+    float r[16];
+    for (uint j = 0; j < 16; j++) r[j] = input[block_idx * 16 + j];
+
+    // Level 1: pack 8 × 4-bit into one uint32
+    uint packed1 = 0;
+    {
+        float tmp[8];
+        for (uint j = 0; j < 8; j++) {
+            float a = r[2*j], b = r[2*j+1];
+            float angle = metal::atan2(b, a);
+            if (angle < 0.0f) angle += 2.0f * M_PI_F;
+            uint8_t idx = 0;
+            float best = 1e10f;
+            for (uint c = 0; c < n_cb1; c++) {
+                float d = metal::abs(angle - cb_l1[c]);
+                if (d < best) { best = d; idx = c; }
+            }
+            packed1 |= (uint(idx) & 0xF) << (j * 4);
+            tmp[j] = metal::sqrt(a*a + b*b);
+        }
+        for (uint j = 0; j < 8; j++) r[j] = tmp[j];
+    }
+    packed_l1[block_idx] = packed1;
+
+    // Level 2: pack 4 × 2-bit into one uint8
+    uint8_t packed2 = 0;
+    {
+        float tmp[4];
+        for (uint j = 0; j < 4; j++) {
+            float a = r[2*j], b = r[2*j+1];
+            float angle = metal::atan2(b, a);
+            uint8_t idx = 0;
+            float best = 1e10f;
+            for (uint c = 0; c < n_cb2; c++) {
+                float d = metal::abs(angle - cb_l2[c]);
+                if (d < best) { best = d; idx = c; }
+            }
+            packed2 |= (idx & 0x3) << (j * 2);
+            tmp[j] = metal::sqrt(a*a + b*b);
+        }
+        for (uint j = 0; j < 4; j++) r[j] = tmp[j];
+    }
+    packed_l2[block_idx] = packed2;
+
+    // Level 3: pack 2 × 2-bit
+    uint8_t packed3 = 0;
+    {
+        float tmp[2];
+        for (uint j = 0; j < 2; j++) {
+            float a = r[2*j], b = r[2*j+1];
+            float angle = metal::atan2(b, a);
+            uint8_t idx = 0;
+            float best = 1e10f;
+            for (uint c = 0; c < n_cb3; c++) {
+                float d = metal::abs(angle - cb_l3[c]);
+                if (d < best) { best = d; idx = c; }
+            }
+            packed3 |= (idx & 0x3) << (j * 2);
+            tmp[j] = metal::sqrt(a*a + b*b);
+        }
+        r[0] = tmp[0]; r[1] = tmp[1];
+    }
+    packed_l3[block_idx] = packed3;
+
+    // Level 4: 1 × 2-bit
+    {
+        float a = r[0], b = r[1];
+        float angle = metal::atan2(b, a);
+        uint8_t idx = 0;
+        float best = 1e10f;
+        for (uint c = 0; c < n_cb4; c++) {
+            float d = metal::abs(angle - cb_l4[c]);
+            if (d < best) { best = d; idx = c; }
+        }
+        packed_l4[block_idx] = idx;
+        radii[block_idx] = static_cast<half>(metal::sqrt(a*a + b*b));
+    }
+}
+
+// Bit-packed inverse polar: reads packed indices, reconstructs vector
+kernel void polar_inverse_packed(
+    device const float* cb1          [[buffer(0)]],
+    device const float* cb2          [[buffer(1)]],
+    device const float* cb3          [[buffer(2)]],
+    device const float* cb4          [[buffer(3)]],
+    device const uint* packed_l1     [[buffer(4)]],  // 1 uint32 per block
+    device const uint8_t* packed_l2  [[buffer(5)]],  // 1 uint8 per block
+    device const uint8_t* packed_l3  [[buffer(6)]],  // 1 uint8 per block
+    device const uint8_t* packed_l4  [[buffer(7)]],  // 1 uint8 per block
+    device const half* radii         [[buffer(8)]],
+    device float* output             [[buffer(9)]],
+    uint block_idx                   [[thread_position_in_grid]]
+) {
+    float r[16];
+    r[0] = float(radii[block_idx]);
+
+    // Unpack L4: 1 × 2-bit
+    { uint idx = packed_l4[block_idx] & 0x3;
+      float th = cb4[idx]; float r0 = r[0];
+      r[0] = r0*cos(th); r[1] = r0*sin(th); }
+
+    // Unpack L3: 2 × 2-bit from uint8
+    { float t[4]; uint8_t p = packed_l3[block_idx];
+      for (uint j=0;j<2;j++) {
+          uint idx = (p >> (j*2)) & 0x3;
+          float th = cb3[idx];
+          t[2*j]=r[j]*cos(th); t[2*j+1]=r[j]*sin(th);
+      }
+      for (uint j=0;j<4;j++) r[j]=t[j]; }
+
+    // Unpack L2: 4 × 2-bit from uint8
+    { float t[8]; uint8_t p = packed_l2[block_idx];
+      for (uint j=0;j<4;j++) {
+          uint idx = (p >> (j*2)) & 0x3;
+          float th = cb2[idx];
+          t[2*j]=r[j]*cos(th); t[2*j+1]=r[j]*sin(th);
+      }
+      for (uint j=0;j<8;j++) r[j]=t[j]; }
+
+    // Unpack L1: 8 × 4-bit from uint32
+    { float t[16]; uint p = packed_l1[block_idx];
+      for (uint j=0;j<8;j++) {
+          uint idx = (p >> (j*4)) & 0xF;
+          float th = cb1[idx];
+          t[2*j]=r[j]*cos(th); t[2*j+1]=r[j]*sin(th);
+      }
+      for (uint j=0;j<16;j++) r[j]=t[j]; }
+
+    for (uint j = 0; j < 16; j++)
+        output[block_idx * 16 + j] = r[j];
+}

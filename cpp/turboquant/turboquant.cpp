@@ -142,10 +142,10 @@ void CompressedSDPA::eval_gpu(const std::vector<array>& inputs, std::vector<arra
   auto& encoder = device.get_command_encoder(stream().index);
 
   auto* lib = device.get_library("turboquant", metallib_path);
-  auto* kernel = device.get_kernel("sdpa_tq_parallel", lib);
+  auto* kernel = device.get_kernel("sdpa_tq_sequential", lib);
   encoder.set_compute_pipeline_state(kernel);
 
-  // Set buffers matching sdpa_tq_parallel signature
+  // Set buffers matching sdpa_tq_sequential signature
   encoder.set_input_array(inputs[0], 0);   // queries
   encoder.set_input_array(inputs[1], 1);   // idx_l1
   encoder.set_input_array(inputs[2], 2);   // idx_l2
@@ -187,6 +187,101 @@ array compressed_sdpa(
       {queries, i1, i2, i3, i4, radii, cb1, cb2, cb3, cb4, values, params});
 }
 
+// Fast dequantize: inverse polar only, no precondition matmul
+array polar_dequantize_fast(
+    const array& i1, const array& i2, const array& i3, const array& i4,
+    const array& radii, const array& cb1, const array& cb2, const array& cb3, const array& cb4,
+    int D, int block_size, StreamOrDevice s) {
+  int N_blocks = radii.size();
+  auto p = std::make_shared<PolarDequantize>(to_stream(s), block_size);
+  auto y = array({N_blocks * block_size}, float32, p,
+      {i1, i2, i3, i4, radii, cb1, cb2, cb3, cb4});
+  return reshape(y, {-1, D});  // Just reshape, no matmul!
+}
+
+// Packed quantize/dequant primitives
+class PackedPolarQuantize : public Primitive {
+ public:
+  PackedPolarQuantize(Stream stream, int bs) : Primitive(stream), block_size_(bs) {}
+  void eval_cpu(const std::vector<array>& i, std::vector<array>& o) override { throw std::runtime_error("GPU only"); }
+  void eval_gpu(const std::vector<array>& inputs, std::vector<array>& outputs) override {
+    auto& vectors = inputs[0];
+    int N_blocks = vectors.size() / block_size_;
+    for (auto& out : outputs) out.set_data(allocator::malloc(out.nbytes()));
+    auto& dev = metal::device(stream().device);
+    auto& enc = dev.get_command_encoder(stream().index);
+    auto* lib = dev.get_library("turboquant", metallib_path);
+    auto* kern = dev.get_kernel("polar_quantize_packed", lib);
+    enc.set_compute_pipeline_state(kern);
+    for (int i = 0; i < 5; i++) enc.set_input_array(inputs[i], i);
+    uint32_t n1=inputs[1].size(), n2=inputs[2].size(), n3=inputs[3].size(), n4=inputs[4].size();
+    enc.set_bytes(n1, 5); enc.set_bytes(n2, 6); enc.set_bytes(n3, 7); enc.set_bytes(n4, 8);
+    enc.set_output_array(outputs[0], 9);  // packed_l1 (uint32)
+    enc.set_output_array(outputs[1], 10); // packed_l2 (uint8)
+    enc.set_output_array(outputs[2], 11); // packed_l3 (uint8)
+    enc.set_output_array(outputs[3], 12); // packed_l4 (uint8)
+    enc.set_output_array(outputs[4], 13); // radii (float16)
+    enc.dispatch_threadgroups(MTL::Size(N_blocks, 1, 1), MTL::Size(1, 1, 1));
+  }
+  const char* name() const override { return "PackedPolarQuantize"; }
+  bool is_equivalent(const Primitive& other) const override { return true; }
+ private:
+  int block_size_;
+};
+
+class PackedPolarDequantize : public Primitive {
+ public:
+  PackedPolarDequantize(Stream stream, int bs) : Primitive(stream), block_size_(bs) {}
+  void eval_cpu(const std::vector<array>& i, std::vector<array>& o) override { throw std::runtime_error("GPU only"); }
+  void eval_gpu(const std::vector<array>& inputs, std::vector<array>& outputs) override {
+    int N_blocks = inputs[4].size();  // radii
+    outputs[0].set_data(allocator::malloc(outputs[0].nbytes()));
+    auto& dev = metal::device(stream().device);
+    auto& enc = dev.get_command_encoder(stream().index);
+    auto* lib = dev.get_library("turboquant", metallib_path);
+    auto* kern = dev.get_kernel("polar_inverse_packed", lib);
+    enc.set_compute_pipeline_state(kern);
+    // Codebooks: inputs 0-3, packed indices: inputs 4-7, radii: input 8
+    for (int i = 0; i < 9; i++) enc.set_input_array(inputs[i], i);
+    enc.set_output_array(outputs[0], 9);
+    enc.dispatch_threadgroups(MTL::Size(N_blocks, 1, 1), MTL::Size(1, 1, 1));
+  }
+  const char* name() const override { return "PackedPolarDequantize"; }
+  bool is_equivalent(const Primitive& other) const override { return true; }
+ private:
+  int block_size_;
+};
+
+std::vector<array> polar_quantize_packed(
+    const array& vectors, const array& precondition,
+    const array& cb1, const array& cb2, const array& cb3, const array& cb4,
+    int block_size, StreamOrDevice s) {
+  int N = vectors.shape(0), D = vectors.shape(1), nb = D / block_size;
+  auto y = matmul(vectors, transpose(precondition));
+  auto y_flat = reshape(y, {-1});
+  int N_blocks = N * nb;
+  auto p = std::make_shared<PackedPolarQuantize>(to_stream(s), block_size);
+  return array::make_arrays(
+      {{N_blocks},     // packed_l1 (1 uint32 per block)
+       {N_blocks},     // packed_l2 (1 uint8 per block)
+       {N_blocks},     // packed_l3 (1 uint8 per block)
+       {N_blocks},     // packed_l4 (1 uint8 per block)
+       {N_blocks}},    // radii (float16)
+      {uint32, uint8, uint8, uint8, float16},
+      p, {y_flat, cb1, cb2, cb3, cb4});
+}
+
+array polar_dequantize_packed(
+    const array& p1, const array& p2, const array& p3, const array& p4,
+    const array& radii, const array& cb1, const array& cb2, const array& cb3, const array& cb4,
+    int D, int block_size, StreamOrDevice s) {
+  int N_blocks = radii.size();
+  auto p = std::make_shared<PackedPolarDequantize>(to_stream(s), block_size);
+  auto y = array({N_blocks * block_size}, float32, p,
+      {cb1, cb2, cb3, cb4, p1, p2, p3, p4, radii});
+  return reshape(y, {-1, D});
+}
+
 // Compressed scoring primitive
 class CompressedScore : public Primitive {
  public:
@@ -200,7 +295,7 @@ class CompressedScore : public Primitive {
     auto& dev = metal::device(stream().device);
     auto& enc = dev.get_command_encoder(stream().index);
     auto* lib = dev.get_library("turboquant", metallib_path);
-    auto* kern = dev.get_kernel("tq_score_parallel", lib);
+    auto* kern = dev.get_kernel("tq_score_shared", lib);
     enc.set_compute_pipeline_state(kern);
     for (int i = 0; i < 10; i++) enc.set_input_array(inputs[i], i);
     enc.set_output_array(outputs[0], 10);

@@ -155,6 +155,117 @@ turboquant_test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/turboquant_test.dir/build.make CMakeFiles/turboquant_test.dir/build
 .PHONY : turboquant_test/fast
 
+#=============================================================================
+# Target rules for targets named gemma4_test
+
+# Build rule for target.
+gemma4_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gemma4_test
+.PHONY : gemma4_test
+
+# fast build rule for target.
+gemma4_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_test.dir/build.make CMakeFiles/gemma4_test.dir/build
+.PHONY : gemma4_test/fast
+
+#=============================================================================
+# Target rules for targets named gemma4_inference
+
+# Build rule for target.
+gemma4_inference: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gemma4_inference
+.PHONY : gemma4_inference
+
+# fast build rule for target.
+gemma4_inference/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_inference.dir/build.make CMakeFiles/gemma4_inference.dir/build
+.PHONY : gemma4_inference/fast
+
+#=============================================================================
+# Target rules for targets named gemma4_block
+
+# Build rule for target.
+gemma4_block: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gemma4_block
+.PHONY : gemma4_block
+
+# fast build rule for target.
+gemma4_block/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_block.dir/build.make CMakeFiles/gemma4_block.dir/build
+.PHONY : gemma4_block/fast
+
+turboquant/gemma4_block.o: turboquant/gemma4_block.cpp.o
+.PHONY : turboquant/gemma4_block.o
+
+# target to build an object file
+turboquant/gemma4_block.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_block.dir/build.make CMakeFiles/gemma4_block.dir/turboquant/gemma4_block.cpp.o
+.PHONY : turboquant/gemma4_block.cpp.o
+
+turboquant/gemma4_block.i: turboquant/gemma4_block.cpp.i
+.PHONY : turboquant/gemma4_block.i
+
+# target to preprocess a source file
+turboquant/gemma4_block.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_block.dir/build.make CMakeFiles/gemma4_block.dir/turboquant/gemma4_block.cpp.i
+.PHONY : turboquant/gemma4_block.cpp.i
+
+turboquant/gemma4_block.s: turboquant/gemma4_block.cpp.s
+.PHONY : turboquant/gemma4_block.s
+
+# target to generate assembly for a file
+turboquant/gemma4_block.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_block.dir/build.make CMakeFiles/gemma4_block.dir/turboquant/gemma4_block.cpp.s
+.PHONY : turboquant/gemma4_block.cpp.s
+
+turboquant/gemma4_inference.o: turboquant/gemma4_inference.cpp.o
+.PHONY : turboquant/gemma4_inference.o
+
+# target to build an object file
+turboquant/gemma4_inference.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_inference.dir/build.make CMakeFiles/gemma4_inference.dir/turboquant/gemma4_inference.cpp.o
+.PHONY : turboquant/gemma4_inference.cpp.o
+
+turboquant/gemma4_inference.i: turboquant/gemma4_inference.cpp.i
+.PHONY : turboquant/gemma4_inference.i
+
+# target to preprocess a source file
+turboquant/gemma4_inference.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_inference.dir/build.make CMakeFiles/gemma4_inference.dir/turboquant/gemma4_inference.cpp.i
+.PHONY : turboquant/gemma4_inference.cpp.i
+
+turboquant/gemma4_inference.s: turboquant/gemma4_inference.cpp.s
+.PHONY : turboquant/gemma4_inference.s
+
+# target to generate assembly for a file
+turboquant/gemma4_inference.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_inference.dir/build.make CMakeFiles/gemma4_inference.dir/turboquant/gemma4_inference.cpp.s
+.PHONY : turboquant/gemma4_inference.cpp.s
+
+turboquant/gemma4_test.o: turboquant/gemma4_test.cpp.o
+.PHONY : turboquant/gemma4_test.o
+
+# target to build an object file
+turboquant/gemma4_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_test.dir/build.make CMakeFiles/gemma4_test.dir/turboquant/gemma4_test.cpp.o
+.PHONY : turboquant/gemma4_test.cpp.o
+
+turboquant/gemma4_test.i: turboquant/gemma4_test.cpp.i
+.PHONY : turboquant/gemma4_test.i
+
+# target to preprocess a source file
+turboquant/gemma4_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_test.dir/build.make CMakeFiles/gemma4_test.dir/turboquant/gemma4_test.cpp.i
+.PHONY : turboquant/gemma4_test.cpp.i
+
+turboquant/gemma4_test.s: turboquant/gemma4_test.cpp.s
+.PHONY : turboquant/gemma4_test.s
+
+# target to generate assembly for a file
+turboquant/gemma4_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gemma4_test.dir/build.make CMakeFiles/gemma4_test.dir/turboquant/gemma4_test.cpp.s
+.PHONY : turboquant/gemma4_test.cpp.s
+
 turboquant/test_main.o: turboquant/test_main.cpp.o
 .PHONY : turboquant/test_main.o
 
@@ -212,8 +323,20 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... turboquant_metallib"
+	@echo "... gemma4_block"
+	@echo "... gemma4_inference"
+	@echo "... gemma4_test"
 	@echo "... turboquant_lib"
 	@echo "... turboquant_test"
+	@echo "... turboquant/gemma4_block.o"
+	@echo "... turboquant/gemma4_block.i"
+	@echo "... turboquant/gemma4_block.s"
+	@echo "... turboquant/gemma4_inference.o"
+	@echo "... turboquant/gemma4_inference.i"
+	@echo "... turboquant/gemma4_inference.s"
+	@echo "... turboquant/gemma4_test.o"
+	@echo "... turboquant/gemma4_test.i"
+	@echo "... turboquant/gemma4_test.s"
 	@echo "... turboquant/test_main.o"
 	@echo "... turboquant/test_main.i"
 	@echo "... turboquant/test_main.s"

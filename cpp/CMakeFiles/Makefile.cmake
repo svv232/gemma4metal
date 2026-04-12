@@ -117,4 +117,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/turboquant_lib.dir/DependInfo.cmake"
   "CMakeFiles/turboquant_metallib.dir/DependInfo.cmake"
   "CMakeFiles/turboquant_test.dir/DependInfo.cmake"
+  "CMakeFiles/gemma4_test.dir/DependInfo.cmake"
+  "CMakeFiles/gemma4_inference.dir/DependInfo.cmake"
+  "CMakeFiles/gemma4_block.dir/DependInfo.cmake"
   )

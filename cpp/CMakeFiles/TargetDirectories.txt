@@ -1,5 +1,8 @@
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_lib.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_metallib.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/turboquant_test.dir
+/Users/andromeda/marketing/turboquant/cpp/CMakeFiles/gemma4_test.dir
+/Users/andromeda/marketing/turboquant/cpp/CMakeFiles/gemma4_inference.dir
+/Users/andromeda/marketing/turboquant/cpp/CMakeFiles/gemma4_block.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/edit_cache.dir
 /Users/andromeda/marketing/turboquant/cpp/CMakeFiles/rebuild_cache.dir

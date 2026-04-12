@@ -57,3 +57,27 @@ add_dependencies(turboquant_test turboquant_metallib)
 target_compile_definitions(turboquant_test PRIVATE
   METALLIB_PATH="${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib"
 )
+
+# Gemma 4 test
+add_executable(gemma4_test turboquant/gemma4_test.cpp)
+target_link_libraries(gemma4_test PRIVATE turboquant_lib)
+add_dependencies(gemma4_test turboquant_metallib)
+target_compile_definitions(gemma4_test PRIVATE
+  METALLIB_PATH="${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib"
+)
+
+# Gemma 4 full inference
+add_executable(gemma4_inference turboquant/gemma4_inference.cpp)
+target_link_libraries(gemma4_inference PRIVATE turboquant_lib)
+add_dependencies(gemma4_inference turboquant_metallib)
+target_compile_definitions(gemma4_inference PRIVATE
+  METALLIB_PATH="${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib"
+)
+
+# Gemma 4 block test
+add_executable(gemma4_block turboquant/gemma4_block.cpp)
+target_link_libraries(gemma4_block PRIVATE turboquant_lib)
+add_dependencies(gemma4_block turboquant_metallib)
+target_compile_definitions(gemma4_block PRIVATE
+  METALLIB_PATH="${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib"
+)
