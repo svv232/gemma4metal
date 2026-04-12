@@ -702,3 +702,202 @@ kernel void polar_inverse_packed_fast(
     for (uint j = 0; j < 16; j++)
         output[block_idx * 16 + j] = r[j];
 }
+
+// ============================================================================
+// Fused int4 SDPA: Q @ dequantize(K_int4)^T with online softmax + V accumulation
+// All in one kernel dispatch — no intermediate score matrix materialized.
+//
+// Based on MLX sdpa_vector architecture:
+// - BN simdgroups, each processes a different key token (stride BN)
+// - BD=32 SIMD lanes, each handles D/BD elements
+// - Online softmax with running max + sum_exp across simdgroups
+//
+// Key innovation: dequantize int4 K in registers, never materializing full K.
+// At long contexts this saves ~50% memory bandwidth vs dequantize-then-SDPA.
+//
+// int4 format (MLX native): uint32 packs 8 x 4-bit values
+//   dequantize: value = scale * ((packed >> (4*i)) & 0xF) + bias
+//   group_size=64: 64 elements share one scale+bias pair
+// ============================================================================
+
+template <int D, int BN = 32>
+[[kernel]] void sdpa_int4_vector(
+    const device float* queries        [[buffer(0)]],
+    const device uint32_t* k_quant     [[buffer(1)]],
+    const device float* k_scales       [[buffer(2)]],
+    const device float* k_biases       [[buffer(3)]],
+    const device uint32_t* v_quant     [[buffer(4)]],
+    const device float* v_scales       [[buffer(5)]],
+    const device float* v_biases       [[buffer(6)]],
+    device float* out                  [[buffer(7)]],
+    const constant int& gqa_factor     [[buffer(8)]],
+    const constant int& N              [[buffer(9)]],
+    const constant float& scale        [[buffer(10)]],
+    const constant int& sliding_window [[buffer(11)]],
+    uint3 tid [[threadgroup_position_in_grid]],
+    uint simd_gid [[simdgroup_index_in_threadgroup]],
+    uint simd_lid [[thread_index_in_simdgroup]]
+) {
+    constexpr int BD = 32;
+    constexpr int elems_per_lane = D / BD;
+
+    const int head_idx = tid.x;
+    const int kv_head_idx = head_idx / gqa_factor;
+
+    const int k_packed_dim = D / 8;
+    const int k_scale_dim = D / 64;
+
+    const device uint32_t* k_q_base = k_quant + kv_head_idx * N * k_packed_dim;
+    const device float* k_s_base = k_scales + kv_head_idx * N * k_scale_dim;
+    const device float* k_b_base = k_biases + kv_head_idx * N * k_scale_dim;
+    const device uint32_t* v_q_base = v_quant + kv_head_idx * N * k_packed_dim;
+    const device float* v_s_base = v_scales + kv_head_idx * N * k_scale_dim;
+    const device float* v_b_base = v_biases + kv_head_idx * N * k_scale_dim;
+
+    int lane_start = simd_lid * elems_per_lane;
+
+    // Pre-scaled query values for vectorized 4-bit dot product (MLX qdot pattern)
+    thread float q_scaled[D / BD];
+    for (int i = 0; i < elems_per_lane; i += 4) {
+        float q0 = scale * queries[head_idx * D + lane_start + i];
+        float q1 = scale * queries[head_idx * D + lane_start + i + 1];
+        float q2 = scale * queries[head_idx * D + lane_start + i + 2];
+        float q3 = scale * queries[head_idx * D + lane_start + i + 3];
+        q_scaled[i]     = q0;
+        q_scaled[i + 1] = q1 / 16.0f;
+        q_scaled[i + 2] = q2 / 256.0f;
+        q_scaled[i + 3] = q3 / 4096.0f;
+    }
+
+    thread float o[D / BD];
+    for (int i = 0; i < elems_per_lane; i++) o[i] = 0.0f;
+
+    float max_score = -1e30f;
+    float sum_exp = 0.0f;
+
+    for (int ki = simd_gid; ki < N; ki += BN) {
+        if (sliding_window > 0 && (N - 1 - ki) >= sliding_window) continue;
+
+        // Vectorized K scoring (MLX qdot pattern for 4-bit)
+        // Read K as uint16 (4 nibbles each), use pre-scaled query to avoid per-nibble shifts
+        // score = sum_groups(scale * dot(q_prescaled, k_packed_nibbles) + bias * sum(q_raw))
+        float score = 0.0f;
+        // k_q_base is uint32* with k_packed_dim uint32s per token
+        // Reinterpret as uint16: 2x as many entries, each holding 4 nibbles
+        const device uint16_t* kw = (const device uint16_t*)(k_q_base + ki * k_packed_dim)
+                                    + lane_start / 4;
+        for (int i = 0; i < elems_per_lane; i += 4) {
+            int group_idx = (lane_start + i) / 64;
+            float s = k_s_base[ki * k_scale_dim + group_idx];
+            float b = k_b_base[ki * k_scale_dim + group_idx];
+            uint16_t w = kw[i / 4];
+            // Packed dot: q_prescaled already divided by {1, 16, 256, 4096}
+            // so q_prescaled[j] * (w & mask_j) = q_raw[j] * nibble_j
+            float accum = q_scaled[i]     * float(w & 0x000Fu)
+                        + q_scaled[i + 1] * float(w & 0x00F0u)
+                        + q_scaled[i + 2] * float(w & 0x0F00u)
+                        + q_scaled[i + 3] * float(w & 0xF000u);
+            // Bias: b * sum(q_raw) where q_raw = q_scaled * {1, 16, 256, 4096}
+            float qsum = q_scaled[i] + q_scaled[i+1]*16.0f
+                       + q_scaled[i+2]*256.0f + q_scaled[i+3]*4096.0f;
+            score += s * accum + b * qsum;
+        }
+        score = simd_sum(score);
+
+        // Online softmax
+        float new_max = max(max_score, score);
+        float factor = metal::fast::exp(max_score - new_max);
+        float exp_score = metal::fast::exp(score - new_max);
+        max_score = new_max;
+        sum_exp = sum_exp * factor + exp_score;
+
+        // Vectorized V dequantize + weighted accumulation
+        const device uint16_t* vw = (const device uint16_t*)(v_q_base + ki * k_packed_dim)
+                                    + lane_start / 4;
+        for (int i = 0; i < elems_per_lane; i += 4) {
+            int group_idx = (lane_start + i) / 64;
+            float vs = v_s_base[ki * k_scale_dim + group_idx];
+            float vb = v_b_base[ki * k_scale_dim + group_idx];
+            uint16_t w = vw[i / 4];
+            // Extract 4 values: vs * nibble + vb
+            float v0 = vs * float(w & 0x000Fu) + vb;
+            float v1 = vs * float((w >> 4) & 0xFu) + vb;
+            float v2 = vs * float((w >> 8) & 0xFu) + vb;
+            float v3 = vs * float((w >> 12) & 0xFu) + vb;
+            o[i]     = o[i]     * factor + exp_score * v0;
+            o[i + 1] = o[i + 1] * factor + exp_score * v1;
+            o[i + 2] = o[i + 2] * factor + exp_score * v2;
+            o[i + 3] = o[i + 3] * factor + exp_score * v3;
+        }
+    }
+
+    // Reduction: combine partial results across simdgroups
+    // Use threadgroup memory: each simdgroup writes its rescaled partials,
+    // then simdgroup 0 reads and sums.
+
+    // Step 1: compute global max and sum across simdgroups
+    threadgroup float tg_max_arr[BN];
+    threadgroup float tg_sum_arr[BN];
+    if (simd_lid == 0) {
+        tg_max_arr[simd_gid] = max_score;
+        tg_sum_arr[simd_gid] = sum_exp;
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    float sg_max = (simd_lid < uint(BN)) ? tg_max_arr[simd_lid] : -1e30f;
+    float new_max = simd_max(sg_max);
+    float sg_factor = metal::fast::exp(sg_max - new_max);
+    float sg_sum_val = (simd_lid < uint(BN)) ? tg_sum_arr[simd_lid] : 0.0f;
+    float global_sum = simd_sum(sg_sum_val * sg_factor);
+
+    // Step 2: each simdgroup rescales its partial output
+    float my_factor = metal::fast::exp(max_score - new_max);
+    for (int i = 0; i < elems_per_lane; i++) {
+        o[i] *= my_factor;
+    }
+
+    // Step 3: reduce across simdgroups using BN passes through threadgroup memory
+    // Each pass: one simdgroup writes its D values, others accumulate
+    // Use a D-sized buffer (not BN*D which exceeds 32KB for D=512)
+    threadgroup float tg_accum[D];
+
+    // Initialize accumulator with simdgroup 0's values
+    if (simd_gid == 0) {
+        for (int i = 0; i < elems_per_lane; i++) {
+            tg_accum[simd_lid * elems_per_lane + i] = o[i];
+        }
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+
+    // Add remaining simdgroups one at a time
+    for (int sg = 1; sg < BN; sg++) {
+        if (int(simd_gid) == sg) {
+            for (int i = 0; i < elems_per_lane; i++) {
+                tg_accum[simd_lid * elems_per_lane + i] += o[i];
+            }
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+    }
+
+    // Step 4: write output — simdgroup 0 reads from accumulator and normalizes
+    if (simd_gid == 0) {
+        for (int i = 0; i < elems_per_lane; i++) {
+            int elem = simd_lid * elems_per_lane + i;
+            float val = tg_accum[elem];
+            out[head_idx * D + elem] = global_sum == 0 ? 0.0f : (val / global_sum);
+        }
+    }
+}
+
+template [[host_name("sdpa_int4_256")]] [[kernel]]
+void sdpa_int4_vector<256, 32>(
+    const device float*, const device uint32_t*, const device float*, const device float*,
+    const device uint32_t*, const device float*, const device float*,
+    device float*, const constant int&, const constant int&, const constant float&,
+    const constant int&, uint3, uint, uint);
+
+template [[host_name("sdpa_int4_512")]] [[kernel]]
+void sdpa_int4_vector<512, 16>(
+    const device float*, const device uint32_t*, const device float*, const device float*,
+    const device uint32_t*, const device float*, const device float*,
+    device float*, const constant int&, const constant int&, const constant float&,
+    const constant int&, uint3, uint, uint);

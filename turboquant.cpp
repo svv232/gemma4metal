@@ -358,4 +358,62 @@ array compressed_score(
   return array({Nq, N}, float32, p, {queries, i1, i2, i3, i4, radii, cb1, cb2, cb3, cb4, params});
 }
 
+// --- Fused int4 SDPA ---
+
+void FusedInt4SDPA::eval_cpu(const std::vector<array>& inputs, std::vector<array>& outputs) {
+  throw std::runtime_error("FusedInt4SDPA only supported on GPU");
+}
+
+void FusedInt4SDPA::eval_gpu(const std::vector<array>& inputs, std::vector<array>& outputs) {
+  // inputs: {queries, k_quant, k_scales, k_biases, v_quant, v_scales, v_biases}
+  auto& queries = inputs[0];
+  int num_heads = queries.shape(0);
+
+  outputs[0].set_data(allocator::malloc(outputs[0].nbytes()));
+
+  auto& device = metal::device(stream().device);
+  auto& encoder = device.get_command_encoder(stream().index);
+  auto* lib = device.get_library("turboquant", metallib_path);
+
+  std::string kernel_name = (head_dim_ == 256) ? "sdpa_int4_256" : "sdpa_int4_512";
+  auto* kernel = device.get_kernel(kernel_name, lib);
+  encoder.set_compute_pipeline_state(kernel);
+
+  encoder.set_input_array(inputs[0], 0);   // queries
+  encoder.set_input_array(inputs[1], 1);   // k_quant
+  encoder.set_input_array(inputs[2], 2);   // k_scales
+  encoder.set_input_array(inputs[3], 3);   // k_biases
+  encoder.set_input_array(inputs[4], 4);   // v_quant
+  encoder.set_input_array(inputs[5], 5);   // v_scales
+  encoder.set_input_array(inputs[6], 6);   // v_biases
+  encoder.set_output_array(outputs[0], 7);
+
+  // Constant buffers
+  int N = inputs[1].shape(1);  // number of KV tokens
+  encoder.set_bytes(&gqa_factor_, sizeof(int), 8);
+  encoder.set_bytes(&N, sizeof(int), 9);
+  encoder.set_bytes(&scale_, sizeof(float), 10);
+  encoder.set_bytes(&sliding_window_, sizeof(int), 11);
+
+  // D=256: BN=32 (1024 threads). D=512: BN=16 (512 threads, register limit)
+  int BN = (head_dim_ <= 256) ? 32 : 16;
+  MTL::Size grid(num_heads, 1, 1);
+  MTL::Size tg(BN * 32, 1, 1);
+  encoder.dispatch_threadgroups(grid, tg);
+}
+
+array sdpa_int4(
+    const array& queries,
+    const array& k_quant, const array& k_scales, const array& k_biases,
+    const array& v_quant, const array& v_scales, const array& v_biases,
+    int gqa_factor, float scale, int sliding_window,
+    StreamOrDevice s) {
+  int num_heads = queries.shape(0);
+  int head_dim = queries.shape(1);
+  auto p = std::make_shared<FusedInt4SDPA>(
+      to_stream(s), head_dim, gqa_factor, scale, sliding_window);
+  return array({num_heads, head_dim}, float32, p,
+               {queries, k_quant, k_scales, k_biases, v_quant, v_scales, v_biases});
+}
+
 }  // namespace turboquant

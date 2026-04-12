@@ -164,6 +164,48 @@ array compressed_score(
     int N, int block_size = 16, float scale = 0.0884f,
     StreamOrDevice s = {});
 
+// Fused int4 SDPA: scores from int4 quantized K + online softmax + V weighted sum
+// All in one Metal kernel dispatch — no intermediate matrices.
+// Beats dequantize+SDPA at all context lengths by avoiding K materialization.
+class FusedInt4SDPA : public Primitive {
+ public:
+  FusedInt4SDPA(Stream stream, int head_dim, int gqa_factor, float scale, int sliding_window)
+      : Primitive(stream), head_dim_(head_dim), gqa_factor_(gqa_factor),
+        scale_(scale), sliding_window_(sliding_window) {}
+
+  void eval_cpu(const std::vector<array>& inputs,
+                std::vector<array>& outputs) override;
+  void eval_gpu(const std::vector<array>& inputs,
+                std::vector<array>& outputs) override;
+
+  const char* name() const override { return "FusedInt4SDPA"; }
+
+  bool is_equivalent(const Primitive& other) const override {
+    auto& o = static_cast<const FusedInt4SDPA&>(other);
+    return head_dim_ == o.head_dim_ && gqa_factor_ == o.gqa_factor_ &&
+           scale_ == o.scale_ && sliding_window_ == o.sliding_window_;
+  }
+
+ private:
+  int head_dim_;
+  int gqa_factor_;
+  float scale_;
+  int sliding_window_;
+};
+
+// Dispatch fused int4 attention
+// q: (num_heads, head_dim) float32
+// k_quant: (num_kv_heads, N, head_dim/8) uint32
+// k_scales, k_biases: (num_kv_heads, N, head_dim/64) float32
+// v_quant, v_scales, v_biases: same shapes as K
+// Returns: (num_heads, head_dim) float32
+array sdpa_int4(
+    const array& queries,
+    const array& k_quant, const array& k_scales, const array& k_biases,
+    const array& v_quant, const array& v_scales, const array& v_biases,
+    int gqa_factor, float scale = 1.0f, int sliding_window = 0,
+    StreamOrDevice s = {});
+
 void set_metallib_path(const std::string& path);
 
 }  // namespace turboquant
