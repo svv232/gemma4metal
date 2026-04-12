@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
-"""Interactive multi-turn chat with Gemma 4 31B.
-Keeps the C++ inference process running between turns to avoid restart overhead.
-Writes tokenized prompts as binary files and launches the C++ binary per turn.
-The KV cache persists via safetensors between invocations."""
-import sys, os, struct, subprocess, time
+"""Interactive multi-turn REPL for Gemma 4 31B.
+
+Keeps conversation context via KV cache files between turns.
+Type 'quit' to exit, 'clear' to reset conversation.
+"""
+import os, struct, subprocess
 
 from transformers import AutoTokenizer
 
+ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.expanduser(
     "~/.cache/huggingface/hub/models--mlx-community--gemma-4-31b-it-4bit/"
     "snapshots/535c5606372deb5d5ab7e29280f111ef2a8e084e/"
 )
+BINARY = os.path.join(ROOT, "build", "gemma4")
+PROMPT_FILE = os.path.join(ROOT, "prompt.bin")
+CACHE_FILE = os.path.join(ROOT, "kv_cache.safetensors")
+
 tok = AutoTokenizer.from_pretrained(MODEL_DIR)
-BINARY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "build", "gemma4_multilayer")
-PROMPT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prompt_491.bin")
-CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kv_cache.safetensors")
+
 
 def tokenize_turn(text, is_first=True):
     if is_first:
@@ -24,19 +28,18 @@ def tokenize_turn(text, is_first=True):
         prompt = f"<end_of_turn>\n<start_of_turn>user\n{text}\n<end_of_turn>\n<start_of_turn>model\n"
         return tok.encode(prompt, add_special_tokens=False)
 
-def write_prompt(tokens):
+
+def write_tokens(tokens):
     with open(PROMPT_FILE, 'wb') as f:
         f.write(struct.pack('<I', len(tokens)))
         for t in tokens:
             f.write(struct.pack('<i', t))
 
+
 def run_inference():
     result = subprocess.run(
-        [BINARY],
-        capture_output=True, text=True, timeout=300,
-        cwd=os.path.dirname(os.path.abspath(__file__))
+        [BINARY], capture_output=True, text=True, timeout=300, cwd=ROOT
     )
-    # Extract the model response from output
     lines = result.stdout.split('\n')
     response = []
     in_gen = False
@@ -50,22 +53,27 @@ def run_inference():
             response.append(line)
 
     text = '\n'.join(response).strip()
-    # Clean up thought tokens
+    # Clean thought markers
     for marker in ['<|channel>', '<channel|>', 'thought', '-//-', '<turn|>']:
         text = text.replace(marker, '')
-    text = text.strip()
-    # Remove leading newlines/dashes
-    while text and text[0] in '-\n ':
-        text = text[1:]
-    return text, result.stdout
+    text = text.strip().lstrip('-\n ')
+
+    # Extract timing
+    tok_s = ""
+    for line in lines:
+        if 'tok/s' in line:
+            tok_s = line.strip()
+            break
+
+    return text, tok_s
+
 
 if __name__ == "__main__":
-    # Clear cache for fresh conversation
     if os.path.exists(CACHE_FILE):
         os.remove(CACHE_FILE)
 
-    print("Gemma 4 31B — Interactive Chat (int4 KV, 6.0x compression)")
-    print("Type 'quit' to exit, 'clear' to reset conversation\n")
+    print("Gemma 4 31B — Interactive Chat")
+    print("Type 'quit' to exit, 'clear' to reset\n")
 
     turn = 0
     while True:
@@ -87,20 +95,11 @@ if __name__ == "__main__":
             continue
 
         tokens = tokenize_turn(user_input, is_first=(turn == 0))
-        write_prompt(tokens)
+        write_tokens(tokens)
 
-        t0 = time.time()
-        response, raw = run_inference()
-        elapsed = time.time() - t0
-
-        # Extract tok/s from raw output
-        tok_s = ""
-        for line in raw.split('\n'):
-            if 'tok/s' in line:
-                tok_s = line.strip()
-                break
-
+        response, tok_s = run_inference()
         print(f"\nGemma: {response}")
-        print(f"  [{tok_s}]\n")
-
+        if tok_s:
+            print(f"  [{tok_s}]")
+        print()
         turn += 1

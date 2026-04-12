@@ -21,12 +21,12 @@ w = os.path.expanduser('~/.cache/huggingface/hub/models--mlx-community--gemma-4-
 tok = AutoTokenizer.from_pretrained(w)
 prompt = '<start_of_turn>user\n${prompt}\n<end_of_turn>\n<start_of_turn>model\n'
 ids = tok.encode(prompt, add_special_tokens=True)
-with open('prompt_491.bin', 'wb') as f:
+with open('prompt.bin', 'wb') as f:
     f.write(struct.pack('<I', len(ids)))
     for t in ids: f.write(struct.pack('<i', t))
 " 2>/dev/null
     rm -f kv_cache.safetensors
-    output=$(./build/gemma4_multilayer 2>&1)
+    output=$(./build/gemma4 2>&1)
 
     if echo "$output" | grep -qi "$expected"; then
         echo "  PASS: $name (found '$expected')"

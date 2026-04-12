@@ -322,7 +322,7 @@ int main() {
     // Load prompt
     std::vector<int> prompt_tokens;
     {
-        std::ifstream pf("prompt_491.bin", std::ios::binary);
+        std::ifstream pf("prompt.bin", std::ios::binary);
         if (pf) {
             uint32_t n; pf.read((char*)&n, 4);
             prompt_tokens.resize(n);

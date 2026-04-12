@@ -18,7 +18,7 @@ find_library(METALKIT_LIB MetalKit)
 find_library(FOUNDATION_LIB Foundation)
 find_library(ACCELERATE_LIB Accelerate)
 
-# Core library
+# Core library (PolarQuant Metal kernels)
 add_library(turboquant_lib turboquant.cpp)
 target_include_directories(turboquant_lib PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}
@@ -43,7 +43,7 @@ add_custom_command(
 )
 add_custom_target(metallib DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/turboquant.metallib)
 
-# Helper macro for executables
+# Helper macro
 macro(add_tq_executable name source)
   add_executable(${name} ${source})
   target_link_libraries(${name} PRIVATE turboquant_lib)
@@ -53,15 +53,12 @@ macro(add_tq_executable name source)
   )
 endmacro()
 
-# Executables
-add_tq_executable(turboquant_test test_main.cpp)
-add_tq_executable(gemma4_test gemma4_test.cpp)
-add_tq_executable(gemma4_inference gemma4_inference.cpp)
-add_tq_executable(gemma4_block gemma4_block.cpp)
-add_tq_executable(gemma4_multilayer gemma4_multilayer.cpp)
-add_tq_executable(gemma4_bench gemma4_bench.cpp)
-add_tq_executable(polar_quality_sweep polar_quality_sweep.cpp)
-add_tq_executable(kv_precision_sweep kv_precision_sweep.cpp)
-add_tq_executable(profile_decode profile_decode.cpp)
-add_tq_executable(context_scaling context_scaling.cpp)
-add_tq_executable(gemma4_multiturn gemma4_multiturn.cpp)
+# Main inference engine
+add_tq_executable(gemma4 gemma4_multilayer.cpp)
+
+# Benchmarks (in benchmarks/ subdirectory)
+add_tq_executable(bench_fp32_vs_int4 benchmarks/gemma4_bench.cpp)
+add_tq_executable(bench_context_scaling benchmarks/context_scaling.cpp)
+add_tq_executable(bench_decode_profile benchmarks/profile_decode.cpp)
+add_tq_executable(bench_kv_precision benchmarks/kv_precision_sweep.cpp)
+add_tq_executable(bench_polar_quality benchmarks/polar_quality_sweep.cpp)
