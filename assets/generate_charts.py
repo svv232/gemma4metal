@@ -31,9 +31,9 @@ tq_tps   = [10.4, 10.3, 10.2, 10.0, 10.0, 10.0, 9.8]
 base_tps = [9.6,  9.2,  8.8,  7.4,  7.3,  7.3,  7.2]
 mlx_tps  = [15.0, 14.8, 14.5, 14.0, 13.5, 13.0, 12.5]  # estimated from mlx-lm behavior
 
-ax.plot(ctx, tq_tps, 'o-', color=TQ_COLOR, linewidth=2.5, markersize=8, label='TurboQuant (fused sdpa_int4)', zorder=3)
-ax.plot(ctx, base_tps, 's--', color=BASELINE_COLOR, linewidth=2, markersize=7, label='C++ baseline (dequantize + SDPA)', zorder=2)
-ax.fill_between(ctx, base_tps, tq_tps, alpha=0.15, color=TQ_COLOR, label='TurboQuant advantage')
+ax.plot(ctx, tq_tps, 'o-', color=TQ_COLOR, linewidth=2.5, markersize=8, label='Fused int4 SDPA (ours)', zorder=3)
+ax.plot(ctx, base_tps, 's--', color=BASELINE_COLOR, linewidth=2, markersize=7, label='Dequantize + SDPA (baseline)', zorder=2)
+ax.fill_between(ctx, base_tps, tq_tps, alpha=0.15, color=TQ_COLOR, label='Fused kernel advantage')
 
 # Annotate the 37% speedup
 ax.annotate('+37%', xy=(786, 10.0), xytext=(786, 11.5),
@@ -44,7 +44,7 @@ ax.annotate('7.3', xy=(786, 7.3), fontsize=10, color=BASELINE_COLOR, ha='center'
 
 ax.set_xlabel('Context Length (tokens)', fontsize=13)
 ax.set_ylabel('Decode Speed (tokens/sec)', fontsize=13)
-ax.set_title('TurboQuant: Constant Throughput Regardless of Context', fontsize=15, fontweight='bold', pad=15)
+ax.set_title('Fused int4 SDPA: Constant Throughput Regardless of Context', fontsize=15, fontweight='bold', pad=15)
 ax.set_ylim(5, 13)
 ax.set_xlim(0, 1000)
 ax.legend(loc='lower left', fontsize=11, framealpha=0.9)
